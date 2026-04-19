@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EmployeeTracking.Domain\EmployeeTracking.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Behaviours\" />
+    <Folder Include="Commands\ApprovePTORequest\" />
+    <Folder Include="Commands\ApproveTimesheet\" />
+    <Folder Include="Commands\BreakEnd\" />
+    <Folder Include="Commands\BreakStart\" />
+    <Folder Include="Commands\ClockIn\" />
+    <Folder Include="Commands\ClockOut\" />
+    <Folder Include="Commands\RejectTimesheet\" />
+    <Folder Include="Commands\SubmitPTORequest\" />
+    <Folder Include="Commands\SubmitTimesheet\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Mappings\" />
+    <Folder Include="Queries\GetNotifications\" />
+    <Folder Include="Queries\GetPayrollReport\" />
+    <Folder Include="Queries\GetTimesheet\" />
+  </ItemGroup>
+
+</Project>
