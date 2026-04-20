@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Behaviours\" />
     <Folder Include="Commands\ApprovePTORequest\" />
     <Folder Include="Commands\ApproveTimesheet\" />
     <Folder Include="Commands\BreakEnd\" />
