@@ -4,7 +4,7 @@
         string Token,
         string Email,
         string FullName,
-        string Role,
+        IList<string> Roles,
         DateTime ExpiresAt
     );
 }

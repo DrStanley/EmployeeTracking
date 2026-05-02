@@ -8,7 +8,9 @@ using EmployeeTracking.Infrastructure.Persistence;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -48,7 +50,46 @@ builder.Services.AddAuthentication(opts =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        IssuerSigningKey = new SymmetricSecurityKey(
+                                       Encoding.UTF8.GetBytes(jwtKey))
+    };
+
+    // Return clean ProblemDetails for 401
+    opts.Events = new JwtBearerEvents
+    {
+        OnChallenge = async ctx =>
+        {
+            ctx.HandleResponse();
+
+            var problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = string.IsNullOrWhiteSpace(ctx.ErrorDescription)
+                    ? "A valid JWT token is required to access this endpoint."
+                    : ctx.ErrorDescription
+            };
+
+            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            ctx.Response.ContentType = "application/problem+json";
+
+            await ctx.Response.WriteAsJsonAsync(problem);
+        },
+
+        OnForbidden = async ctx =>
+        {
+            var problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Access denied",
+                Detail = "You do not have permission to access this endpoint."
+            };
+
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            ctx.Response.ContentType = "application/problem+json";
+
+            await ctx.Response.WriteAsJsonAsync(problem);
+        }
     };
 });
 
@@ -77,8 +118,9 @@ builder.Services.AddAutoMapper(cfg => { },
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITimeEntryFactory, TimeEntryFactory>();
-
-
+builder.Services.AddScoped<ITimesheetCalculationService, TimesheetCalculationService>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,
+    ForbiddenResponseHandler>();
 // ── Swagger ───────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -175,6 +217,17 @@ using (var scope = app.Services.CreateScope())
     if (!db.AttendancePolicies.Any())
     {
         db.AttendancePolicies.Add(AttendancePolicy.CreateDefault("Standard Policy"));
+        await db.SaveChangesAsync();
+    }
+    if (!db.PayPeriods.Any())
+    {
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var start = new DateOnly(now.Year, now.Month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        db.PayPeriods.Add(PayPeriod.Create(
+            $"{start:MMMM yyyy}", start, end));
+
         await db.SaveChangesAsync();
     }
 }

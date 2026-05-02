@@ -20,16 +20,12 @@
 
   <ItemGroup>
     <Folder Include="Commands\ApprovePTORequest\" />
-    <Folder Include="Commands\ApproveTimesheet\" />
     <Folder Include="Commands\BreakEnd\" />
     <Folder Include="Commands\BreakStart\" />
-    <Folder Include="Commands\RejectTimesheet\" />
     <Folder Include="Commands\SubmitPTORequest\" />
-    <Folder Include="Commands\SubmitTimesheet\" />
     <Folder Include="Mappings\" />
     <Folder Include="Queries\GetNotifications\" />
     <Folder Include="Queries\GetPayrollReport\" />
-    <Folder Include="Queries\GetTimesheet\" />
   </ItemGroup>
 
 </Project>

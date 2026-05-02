@@ -8,6 +8,6 @@ namespace EmployeeTracking.Application.Commands.Auth
     string LastName,
     string Email,
     string Password,
-    string Role
-) : IRequest<AuthResponse>;
+    IList<string> Roles
+        ) : IRequest<AuthResponse>;
 }

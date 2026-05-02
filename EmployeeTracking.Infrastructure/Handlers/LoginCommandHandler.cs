@@ -42,7 +42,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 Token: token,
                 Email: user.Email!,
                 FullName: user.UserName ?? user.Email!,
-                Role: roles.FirstOrDefault() ?? string.Empty,
+                Roles: roles,
                 ExpiresAt: DateTime.UtcNow.AddMinutes(60));
         }
     }

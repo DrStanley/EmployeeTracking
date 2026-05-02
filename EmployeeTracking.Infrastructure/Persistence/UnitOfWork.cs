@@ -13,6 +13,8 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public ITimesheetRepository Timesheets { get; }
         public IPTORepository PTORequests { get; }
         public IPTOBalanceRepository PTOBalances { get; }
+        public IPayPeriodRepository PayPeriods { get; }
+
 
         public UnitOfWork(AppDbContext context)
         {
@@ -22,6 +24,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
             Timesheets = new TimesheetRepository(context);
             PTORequests = new PTORepository(context);
             PTOBalances = new PTOBalanceRepository(context);
+            PayPeriods = new PayPeriodRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

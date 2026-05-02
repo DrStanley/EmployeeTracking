@@ -48,10 +48,14 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 throw new DomainException($"Registration failed: {errors}");
             }
 
-            if (!await _roleManager.RoleExistsAsync(request.Role))
-                await _roleManager.CreateAsync(new IdentityRole(request.Role));
+            // Assign all requested roles
+            foreach (var role in request.Roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(role))
+                    await _roleManager.CreateAsync(new IdentityRole(role));
 
-            await _userManager.AddToRoleAsync(user, request.Role);
+                await _userManager.AddToRoleAsync(user, role);
+            }
 
             // link to Employee record if Admin already created one for this email
             var employeeRecord = await _uow.Employees.GetByEmailAsync(request.Email, ct);
@@ -68,7 +72,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 Token: token,
                 Email: user.Email!,
                 FullName: $"{request.FirstName} {request.LastName}",
-                Role: request.Role,
+                Roles: request.Roles,
                 ExpiresAt: DateTime.UtcNow.AddMinutes(60));
         }
     }

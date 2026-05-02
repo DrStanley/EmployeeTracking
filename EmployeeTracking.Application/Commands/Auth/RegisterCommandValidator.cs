@@ -12,8 +12,13 @@ namespace EmployeeTracking.Application.Commands.Auth
             RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.Password).NotEmpty().MinimumLength(8);
-            RuleFor(x => x.Role).NotEmpty().Must(r => ValidRoles.Contains(r))
-                .WithMessage("Role must be Employee, Manager, or Admin.");
+            RuleFor(x => x.Roles)
+           .NotEmpty()
+           .WithMessage("At least one role is required.");
+
+            RuleForEach(x => x.Roles)
+                .Must(r => ValidRoles.Contains(r))
+                .WithMessage("Each role must be Employee, Manager, or Admin.");
         }
     }
 }
