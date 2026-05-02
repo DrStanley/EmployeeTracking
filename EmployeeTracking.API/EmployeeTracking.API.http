@@ -1,6 +1,6 @@
 @EmployeeTracking.API_HostAddress = http://localhost:5268
 
-GET {{EmployeeTracking.API_HostAddress}}/weatherforecast/
+GET {{EmployeeTracking.API_HostAddress}}/swagger/
 Accept: application/json
 
 ###

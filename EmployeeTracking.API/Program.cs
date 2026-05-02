@@ -1,4 +1,5 @@
 ﻿using EmployeeTracking.Application.Behaviours;
+using EmployeeTracking.Application.Interfaces;
 using EmployeeTracking.Infrastructure.Identity;
 using EmployeeTracking.Infrastructure.Persistence;
 using FluentValidation;
@@ -50,8 +51,13 @@ builder.Services.AddAuthentication(opts =>
 
 // ── MediatR + Validation Pipeline ────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>
+{
     cfg.RegisterServicesFromAssembly(
-        typeof(EmployeeTracking.Application.AssemblyReference).Assembly));
+        typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
+    cfg.RegisterServicesFromAssembly(
+        typeof(EmployeeTracking.Infrastructure.InfrastructureAssemblyReference).Assembly);
+});
+
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 builder.Services.AddValidatorsFromAssembly(
@@ -63,6 +69,9 @@ builder.Services.AddValidatorsFromAssembly(
 builder.Services.AddAutoMapper(cfg => { },
     typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
 
+
+// ── Custom Services ───────────────────────────────────────────────────────────
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // ── Swagger ───────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
@@ -105,4 +114,17 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+//Seed data on startup (optional)
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
+
+    foreach (var role in new[] { "Employee", "Manager", "Admin" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
 app.Run();
