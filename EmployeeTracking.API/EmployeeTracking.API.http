@@ -3,4 +3,6 @@
 GET {{EmployeeTracking.API_HostAddress}}/swagger/
 Accept: application/json
 
-###
+### Get all employees
+GET {{EmployeeTracking.API_HostAddress}}/api/employees
+Accept: application/json

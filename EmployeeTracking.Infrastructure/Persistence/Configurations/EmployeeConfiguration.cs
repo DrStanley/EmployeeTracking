@@ -28,6 +28,19 @@ namespace EmployeeTracking.Infrastructure.Persistence.Configurations
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
+            builder.Property(e => e.CreatedByUserId)
+                .HasMaxLength(450)
+                .IsRequired(false);
+
+            builder.Property(e => e.ReferredByEmployeeId)
+                .IsRequired(false);
+
+            builder.HasOne(e => e.ReferredByEmployee)
+                .WithMany()
+                .HasForeignKey(e => e.ReferredByEmployeeId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(false);
+
             builder.HasOne(e => e.Department)
                 .WithMany()
                 .HasForeignKey(e => e.DepartmentId)
@@ -47,9 +60,6 @@ namespace EmployeeTracking.Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(e => e.AttendancePolicyId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Ignore domain events — not persisted
-
         }
     }
 }

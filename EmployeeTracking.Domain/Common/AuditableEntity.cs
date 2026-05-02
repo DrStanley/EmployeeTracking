@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using EmployeeTracking.Domain.Interfaces;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EmployeeTracking.Domain.Common
 {

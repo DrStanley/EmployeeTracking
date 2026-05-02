@@ -13,15 +13,18 @@ namespace EmployeeTracking.Infrastructure.Handlers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IUnitOfWork _uow;
 
         public RegisterCommandHandler(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IJwtTokenService jwtTokenService)
+            IJwtTokenService jwtTokenService,
+            IUnitOfWork uow)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtTokenService = jwtTokenService;
+            _uow = uow;
         }
 
         public async Task<AuthResponse> Handle(
@@ -49,6 +52,14 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 await _roleManager.CreateAsync(new IdentityRole(request.Role));
 
             await _userManager.AddToRoleAsync(user, request.Role);
+
+            // link to Employee record if Admin already created one for this email
+            var employeeRecord = await _uow.Employees.GetByEmailAsync(request.Email, ct);
+            if (employeeRecord is not null)
+            {
+                user.EmployeeId = employeeRecord.Id;
+                await _userManager.UpdateAsync(user);
+            }
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenService.GenerateToken(user.Id, user.Email!, user.EmployeeId, roles);

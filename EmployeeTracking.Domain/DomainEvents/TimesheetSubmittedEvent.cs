@@ -1,4 +1,4 @@
-﻿using EmployeeTracking.Domain.Common;
+﻿using EmployeeTracking.Domain.Interfaces;
 
 namespace EmployeeTracking.Domain.DomainEvents
 {

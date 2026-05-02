@@ -37,3 +37,9 @@ namespace EmployeeTracking.API.Controllers
         }
     }
 }
+//Admin test data
+//    Username: vosedi8744@cadinr.com
+//    Password: Vosedi8744@cadinr.com
+//Manager test data
+//    Username: s6zrp0jc6c@lnovic.com
+//    Password: S6zrp0jc6c@lnovic.com

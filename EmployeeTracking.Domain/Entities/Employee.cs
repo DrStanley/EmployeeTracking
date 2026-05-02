@@ -1,4 +1,5 @@
 ﻿using EmployeeTracking.Domain.Common;
+using EmployeeTracking.Domain.DomainEvents;
 using EmployeeTracking.Domain.Enums;
 
 namespace EmployeeTracking.Domain.Entities
@@ -19,11 +20,15 @@ namespace EmployeeTracking.Domain.Entities
         public EmploymentType EmploymentType { get; private set; }
         public bool IsActive { get; private set; } = true;
 
-        // Navigation properties
+        public string? CreatedByUserId { get; private set; }
+
+        public Guid? ReferredByEmployeeId { get; private set; }
+
         public Department Department { get; private set; } = null!;
         public Employee? Manager { get; private set; }
         public Shift? Shift { get; private set; }
         public AttendancePolicy AttendancePolicy { get; private set; } = null!;
+        public Employee? ReferredByEmployee { get; private set; }
 
         private Employee() { }
 
@@ -35,7 +40,9 @@ namespace EmployeeTracking.Domain.Entities
             string jobTitle,
             Guid departmentId,
             Guid attendancePolicyId,
-            EmploymentType employmentType)
+            EmploymentType employmentType,
+            string? createdByUserId = null,
+            Guid? referredByEmployeeId = null)
         {
             var employee = new Employee
             {
@@ -48,9 +55,12 @@ namespace EmployeeTracking.Domain.Entities
                 DepartmentId = departmentId,
                 AttendancePolicyId = attendancePolicyId,
                 EmploymentType = employmentType,
+                CreatedByUserId = createdByUserId,
+                ReferredByEmployeeId = referredByEmployeeId,
                 IsActive = true
             };
-            employee.AddDomainEvent(new DomainEvents.EmployeeCreatedEvent(employee.Id));
+
+            employee.AddDomainEvent(new EmployeeCreatedEvent(employee.Id));
             return employee;
         }
 

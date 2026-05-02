@@ -1,7 +1,6 @@
-﻿using EmployeeTracking.Application.Commands.Auth;
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace EmployeeTracking.Application.Behaviours
+namespace EmployeeTracking.Application.Commands.Auth
 {
     public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {

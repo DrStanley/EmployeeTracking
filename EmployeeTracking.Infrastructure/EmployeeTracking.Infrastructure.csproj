@@ -26,7 +26,6 @@
   <ItemGroup>
     <Folder Include="BackgroundJobs\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Persistence\Repositories\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

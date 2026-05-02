@@ -1,5 +1,8 @@
-﻿using EmployeeTracking.Application.Behaviours;
+﻿using EmployeeTracking.API.Extensions;
+using EmployeeTracking.API.Middleware;
+using EmployeeTracking.Application.Behaviours;
 using EmployeeTracking.Application.Interfaces;
+using EmployeeTracking.Domain.Entities;
 using EmployeeTracking.Infrastructure.Identity;
 using EmployeeTracking.Infrastructure.Persistence;
 using FluentValidation;
@@ -72,27 +75,57 @@ builder.Services.AddAutoMapper(cfg => { },
 
 // ── Custom Services ───────────────────────────────────────────────────────────
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ITimeEntryFactory, TimeEntryFactory>();
+
 
 // ── Swagger ───────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Employee Tracking API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Employee Tracking API",
+        Version = "v1",
+        Description = "Enterprise employee time tracking — clock-in/out, timesheets, PTO, and payroll."
+    });
+
+    // Include XML comments from API project
+    var apiXml = Path.Combine(AppContext.BaseDirectory,
+        "EmployeeTracking.API.xml");
+    if (File.Exists(apiXml))
+        c.IncludeXmlComments(apiXml);
+
+    // Include XML comments from Application project (DTOs)
+    var appXml = Path.Combine(AppContext.BaseDirectory,
+        "EmployeeTracking.Application.xml");
+    if (File.Exists(appXml))
+        c.IncludeXmlComments(appXml);
+
+    // Show enum names + values instead of raw numbers
+    c.SchemaFilter<EnumSchemaFilter>();
+
+    // JWT Bearer auth button
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token. Example: Bearer eyJhbGci..."
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
-                    { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
             },
             Array.Empty<string>()
         }
@@ -110,6 +143,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -125,6 +159,23 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
+// Seed default department and attendance policy
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (!db.Departments.Any())
+    {
+        db.Departments.Add(Department.Create("General", "Default department"));
+        await db.SaveChangesAsync();
+    }
+
+    if (!db.AttendancePolicies.Any())
+    {
+        db.AttendancePolicies.Add(AttendancePolicy.CreateDefault("Standard Policy"));
+        await db.SaveChangesAsync();
     }
 }
 app.Run();
