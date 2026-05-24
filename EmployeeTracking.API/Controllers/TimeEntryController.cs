@@ -10,7 +10,7 @@ namespace EmployeeTracking.API.Controllers
 {
     /// <summary>Handles employee time tracking — clock-in, clock-out, and breaks.</summary>
     [ApiController]
-    [Route("api/timeentries")]
+    [Route("api/[controller]")]
     [Authorize]
     public class TimeEntryController : ControllerBase
     {

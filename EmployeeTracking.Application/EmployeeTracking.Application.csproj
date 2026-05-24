@@ -19,10 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\ApprovePTORequest\" />
     <Folder Include="Commands\BreakEnd\" />
     <Folder Include="Commands\BreakStart\" />
-    <Folder Include="Commands\SubmitPTORequest\" />
     <Folder Include="Mappings\" />
     <Folder Include="Queries\GetNotifications\" />
     <Folder Include="Queries\GetPayrollReport\" />

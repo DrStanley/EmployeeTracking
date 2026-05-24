@@ -10,13 +10,13 @@ namespace EmployeeTracking.API.Controllers
 {
     /// <summary>Manages employee timesheets — creation, submission, and approval.</summary>
     [ApiController]
-    [Route("api/timesheets")]
+    [Route("api/[controller]")]
     [Authorize]
-    public class TimesheetController : ControllerBase
+    public class TimesheetsController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public TimesheetController(IMediator mediator) => _mediator = mediator;
+        public TimesheetsController(IMediator mediator) => _mediator = mediator;
 
         /// <summary>Create or retrieve a timesheet for a pay period.</summary>
         [HttpPost]

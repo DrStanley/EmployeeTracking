@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace EmployeeTracking.API.Controllers
 {
     [ApiController]
-    [Route("api/employees")]
+    [Route("api/[controller]")]
     [Authorize]
     public class EmployeesController : ControllerBase
     {

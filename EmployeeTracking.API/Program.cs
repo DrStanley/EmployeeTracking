@@ -18,13 +18,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Database ─────────────────────────────────────────────────────────────────
+// ── Database
 builder.Services.AddDbContext<AppDbContext>(opts =>
     opts.UseSqlServer(
         builder.Configuration.GetConnectionString("Default"),
         sql => sql.MigrationsAssembly("EmployeeTracking.Infrastructure")));
 
-// ── Identity ─────────────────────────────────────────────────────────────────
+// ── Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opts =>
 {
     opts.Password.RequireDigit = true;
@@ -33,7 +33,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opts =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ── JWT Authentication ────────────────────────────────────────────────────────
+// ── JWT Authentication 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(opts =>
 {
@@ -93,7 +93,7 @@ builder.Services.AddAuthentication(opts =>
     };
 });
 
-// ── MediatR + Validation Pipeline ────────────────────────────────────────────
+// ── MediatR + Validation Pipeline 
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(
@@ -107,21 +107,21 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 builder.Services.AddValidatorsFromAssembly(
     typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
 
-// ── AutoMapper ────────────────────────────────────────────────────────────────
+// ── AutoMapper ────────
 //builder.Services.AddAutoMapper(
 //    typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
 builder.Services.AddAutoMapper(cfg => { },
     typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
 
 
-// ── Custom Services ───────────────────────────────────────────────────────────
+// ── Custom Services ───
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITimeEntryFactory, TimeEntryFactory>();
 builder.Services.AddScoped<ITimesheetCalculationService, TimesheetCalculationService>();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,
     ForbiddenResponseHandler>();
-// ── Swagger ───────────────────────────────────────────────────────────────────
+// ── Swagger──
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -228,6 +228,17 @@ using (var scope = app.Services.CreateScope())
         db.PayPeriods.Add(PayPeriod.Create(
             $"{start:MMMM yyyy}", start, end));
 
+        await db.SaveChangesAsync();
+    }
+    if (!db.PTOBalances.Any())
+    {
+        var employees = db.Employees.ToList();
+        foreach (var emp in employees)
+        {
+            var balance = PTOBalance.CreateForYear(emp.Id, DateTime.UtcNow.Year);
+            balance.Accrue(80m); // seed with 80 hours (2 weeks)
+            db.PTOBalances.Add(balance);
+        }
         await db.SaveChangesAsync();
     }
 }
