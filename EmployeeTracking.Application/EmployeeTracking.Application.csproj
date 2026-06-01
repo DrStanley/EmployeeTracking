@@ -23,7 +23,6 @@
     <Folder Include="Commands\BreakStart\" />
     <Folder Include="Mappings\" />
     <Folder Include="Queries\GetNotifications\" />
-    <Folder Include="Queries\GetPayrollReport\" />
   </ItemGroup>
 
 </Project>

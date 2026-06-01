@@ -10,6 +10,7 @@ namespace EmployeeTracking.Application.Interfaces
         IPTORepository PTORequests { get; }
         IPTOBalanceRepository PTOBalances { get; }
         IPayPeriodRepository PayPeriods { get; }
+        IPayrollReportRepository PayrollReports { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }

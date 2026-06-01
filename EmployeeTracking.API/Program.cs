@@ -119,8 +119,9 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITimeEntryFactory, TimeEntryFactory>();
 builder.Services.AddScoped<ITimesheetCalculationService, TimesheetCalculationService>();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,
-    ForbiddenResponseHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,ForbiddenResponseHandler>();
+builder.Services.AddScoped<IOvertimeStrategy, StandardOvertimeStrategy>();
+
 // ── Swagger──
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
