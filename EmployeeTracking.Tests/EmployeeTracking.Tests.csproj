@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+	<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,12 +24,6 @@
     <ProjectReference Include="..\EmployeeTracking.Application\EmployeeTracking.Application.csproj" />
     <ProjectReference Include="..\EmployeeTracking.Domain\EmployeeTracking.Domain.csproj" />
     <ProjectReference Include="..\EmployeeTracking.Infrastructure\EmployeeTracking.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Integration\" />
-    <Folder Include="Unit\Application\" />
-    <Folder Include="Unit\Domain\" />
   </ItemGroup>
 
 </Project>
