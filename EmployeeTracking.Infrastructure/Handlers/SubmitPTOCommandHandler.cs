@@ -12,8 +12,12 @@ namespace EmployeeTracking.Infrastructure.Handlers
      : IRequestHandler<SubmitPTOCommand, PTORequestDto>
     {
         private readonly IUnitOfWork _uow;
-
-        public SubmitPTOCommandHandler(IUnitOfWork uow) => _uow = uow;
+        private readonly IEmailNotificationService _emailService;
+        public SubmitPTOCommandHandler(IUnitOfWork uow, IEmailNotificationService emailService)
+        {
+            _uow = uow;
+            _emailService = emailService;
+        }
 
         public async Task<PTORequestDto> Handle(
             SubmitPTOCommand request, CancellationToken ct)
@@ -58,7 +62,8 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             await _uow.PTORequests.AddAsync(pto, ct);
             await _uow.SaveChangesAsync(ct);
-
+            var employeeManager = await _uow.Employees.GetByIdAsync(employee.ManagerId.Value, ct)?? throw new DomainException("No manager assigned to Employee");
+            _ = _emailService.SendPTORequestSubmittedAsync(pto, employee!, employeeManager,ct);
             return PTOMapHelper.MapToDto(pto, employee, null);
         }
     }

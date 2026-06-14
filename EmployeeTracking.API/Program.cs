@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Resend;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -126,6 +127,17 @@ builder.Services.AddScoped<IOvertimeStrategy, StandardOvertimeStrategy>();
 
 // Notification service
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Resend email client
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(opts =>
+    opts.ApiToken = builder.Configuration["Resend:ApiKey"]!);
+builder.Services.AddTransient<IResend, ResendClient>();
+
+// Email services
+builder.Services.AddScoped<IEmailService, ResendEmailService>();
+builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>();
 
 // Background jobs
 builder.Services.AddHostedService<MissedPunchJob>();

@@ -16,8 +16,12 @@ namespace EmployeeTracking.Infrastructure.Handlers
       : IRequestHandler<ApprovePTOCommand, PTORequestDto>
     {
         private readonly IUnitOfWork _uow;
-
-        public ApprovePTOCommandHandler(IUnitOfWork uow) => _uow = uow;
+        private readonly IEmailNotificationService _emailService;
+        public ApprovePTOCommandHandler(IUnitOfWork uow, IEmailNotificationService emailService)
+        {
+            _uow = uow;
+            _emailService = emailService;
+        }
 
         public async Task<PTORequestDto> Handle(
             ApprovePTOCommand request, CancellationToken ct)
@@ -51,7 +55,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
             _uow.PTORequests.Update(pto);
             _uow.PTOBalances.Update(balance);
             await _uow.SaveChangesAsync(ct);
-
+            _ = _emailService.SendPTOApprovedAsync(pto, employee!, ct);
             var reviewer = await _uow.Employees.GetByIdAsync(request.ReviewerId, ct);
             return PTOMapHelper.MapToDto(pto, employee, reviewer);
         }
