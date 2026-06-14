@@ -10,7 +10,7 @@ namespace EmployeeTracking.Domain.Common
 
         private readonly List<IDomainEvent> _domainEvents = new();
 
-        [NotMapped]//tells EF Core to skip this property on every class that inherits from AuditableEntity
+        [NotMapped]
         public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
         protected void AddDomainEvent(IDomainEvent domainEvent)

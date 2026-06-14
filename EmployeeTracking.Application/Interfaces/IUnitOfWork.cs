@@ -12,7 +12,10 @@ namespace EmployeeTracking.Application.Interfaces
         IPayPeriodRepository PayPeriods { get; }
         IPayrollReportRepository PayrollReports { get; }
         INotificationRepository Notifications { get; }
-
+        IAttendancePolicyRepository AttendancePolicies { get; }
+        IShiftRepository Shifts { get; }
+        IHolidayRepository Holidays { get; }
+        IOvertimeRuleRepository OvertimeRules { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }
 }

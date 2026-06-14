@@ -16,7 +16,10 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public IPayPeriodRepository PayPeriods { get; }
         public IPayrollReportRepository PayrollReports { get; }
         public INotificationRepository Notifications { get; }
-
+        public IAttendancePolicyRepository AttendancePolicies { get; }
+        public IShiftRepository Shifts { get; }
+        public IHolidayRepository Holidays { get; }
+        public IOvertimeRuleRepository OvertimeRules { get; }
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -28,6 +31,10 @@ namespace EmployeeTracking.Infrastructure.Persistence
             PayPeriods = new PayPeriodRepository(context);
             PayrollReports = new PayrollReportRepository(context);
             Notifications = new NotificationRepository(context);
+            AttendancePolicies = new AttendancePolicyRepository(context);
+            Shifts = new ShiftRepository(context);
+            Holidays = new HolidayRepository(context);
+            OvertimeRules = new OvertimeRuleRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

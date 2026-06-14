@@ -22,6 +22,19 @@ namespace EmployeeTracking.Domain.Entities
                 PlannedEnd = end,
                 GracePeriodMinutes = gracePeriodMinutes
             };
+        public void Update(
+    string name,
+    TimeOnly start,
+    TimeOnly end,
+    int gracePeriodMinutes)
+        {
+            Name = name;
+            PlannedStart = start;
+            PlannedEnd = end;
+            GracePeriodMinutes = gracePeriodMinutes;
+        }
+
+        public void Deactivate() => IsActive = false;
     }
 
 }

@@ -27,7 +27,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public DbSet<PayrollReport> PayrollReports => Set<PayrollReport>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-
+        public DbSet<Holiday> Holidays => Set<Holiday>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

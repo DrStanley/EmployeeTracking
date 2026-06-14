@@ -33,5 +33,30 @@ namespace EmployeeTracking.Domain.Entities
                 PTOAccrualRatePerPayPeriod = 4m,
                 MaxPTOBalanceHours = 240m
             };
+        public void Update(
+    string name,
+    decimal dailyOT,
+    decimal weeklyOT,
+    decimal multiplier,
+    bool hasPaidBreaks,
+    int paidBreakMinutes,
+    int unpaidBreakMinutes)
+        {
+            Name = name;
+            DailyOvertimeThresholdHours = dailyOT;
+            WeeklyOvertimeThresholdHours = weeklyOT;
+            OvertimeMultiplier = multiplier;
+            HasPaidBreaks = hasPaidBreaks;
+            PaidBreakMinutes = paidBreakMinutes;
+            UnpaidBreakMinutes = unpaidBreakMinutes;
+        }
+
+        public void UpdatePTOSettings(
+            decimal accrualRate,
+            decimal maxBalance)
+        {
+            PTOAccrualRatePerPayPeriod = accrualRate;
+            MaxPTOBalanceHours = maxBalance;
+        }
     }
 }

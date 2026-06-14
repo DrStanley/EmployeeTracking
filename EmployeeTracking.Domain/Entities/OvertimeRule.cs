@@ -27,5 +27,18 @@ namespace EmployeeTracking.Domain.Entities
                 HasDoubleTime = false,
                 DoubleTimeDailyThreshold = 12m
             };
+        public void Update(
+    decimal dailyThreshold,
+    decimal weeklyThreshold,
+    decimal premiumMultiplier,
+    bool hasDoubleTime,
+    decimal doubleTimeDailyThreshold)
+        {
+            DailyThresholdHours = dailyThreshold;
+            WeeklyThresholdHours = weeklyThreshold;
+            PremiumMultiplier = premiumMultiplier;
+            HasDoubleTime = hasDoubleTime;
+            DoubleTimeDailyThreshold = doubleTimeDailyThreshold;
+        }
     }
 }
