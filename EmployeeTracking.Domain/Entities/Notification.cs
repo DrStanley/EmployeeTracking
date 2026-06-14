@@ -27,7 +27,7 @@ namespace EmployeeTracking.Domain.Entities
                 Type = type,
                 Message = message,
                 IsRead = false,
-                SentAt = DateTimeOffset.UtcNow
+                SentAt = DateTimeOffset.Now
             };
 
         public void MarkRead() => IsRead = true;

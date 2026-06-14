@@ -43,7 +43,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 Email: user.Email!,
                 FullName: user.UserName ?? user.Email!,
                 Roles: roles,
-                ExpiresAt: DateTime.UtcNow.AddMinutes(60));
+                ExpiresAt: DateTime.Now.AddMinutes(60));
         }
     }
 }

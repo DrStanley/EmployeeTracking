@@ -31,7 +31,7 @@ namespace EmployeeTracking.Domain.Entities
                 PerformedBy = performedBy,
                 OldValues = oldValues,
                 NewValues = newValues,
-                Timestamp = DateTimeOffset.UtcNow
+                Timestamp = DateTimeOffset.Now
             };
     }
 

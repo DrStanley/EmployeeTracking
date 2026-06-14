@@ -57,7 +57,7 @@ namespace EmployeeTracking.API.Controllers
             => Ok(await _mediator.Send(
                 new GetPTOBalanceQuery(
                     User.GetEmployeeId(),
-                    DateTime.UtcNow.Year), ct));
+                    DateTime.Now.Year), ct));
 
         /// <summary>Get all pending PTO requests for the authenticated manager.</summary>
         [HttpGet("pending")]

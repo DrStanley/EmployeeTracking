@@ -51,7 +51,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
             }
 
             // 5. Create the clock-out entry
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTimeOffset.Now;
             var entry = _factory.CreateClockOut(
                 request.EmployeeId,
                 request.Source,

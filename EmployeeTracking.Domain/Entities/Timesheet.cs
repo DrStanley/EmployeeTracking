@@ -39,7 +39,7 @@ namespace EmployeeTracking.Domain.Entities
             if (Status != TimesheetStatus.Draft && Status != TimesheetStatus.Rejected)
                 throw new DomainException($"Cannot submit a timesheet with status '{Status}'.");
             Status = TimesheetStatus.Submitted;
-            SubmittedAt = DateTimeOffset.UtcNow;
+            SubmittedAt = DateTimeOffset.Now;
             AddDomainEvent(new DomainEvents.TimesheetSubmittedEvent(Id, EmployeeId));
         }
 
@@ -48,7 +48,7 @@ namespace EmployeeTracking.Domain.Entities
             if (Status != TimesheetStatus.Submitted)
                 throw new DomainException("Only submitted timesheets can be approved.");
             Status = TimesheetStatus.Approved;
-            ApprovedAt = DateTimeOffset.UtcNow;
+            ApprovedAt = DateTimeOffset.Now;
             _approvalActions.Add(ApprovalAction.Record(Id, reviewerId, ApprovalDecision.Approved, notes));
             AddDomainEvent(new DomainEvents.TimesheetApprovedEvent(Id, EmployeeId, reviewerId));
         }

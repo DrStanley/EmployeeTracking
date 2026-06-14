@@ -15,6 +15,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public IPTOBalanceRepository PTOBalances { get; }
         public IPayPeriodRepository PayPeriods { get; }
         public IPayrollReportRepository PayrollReports { get; }
+        public INotificationRepository Notifications { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -26,6 +27,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
             PTOBalances = new PTOBalanceRepository(context);
             PayPeriods = new PayPeriodRepository(context);
             PayrollReports = new PayrollReportRepository(context);
+            Notifications = new NotificationRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

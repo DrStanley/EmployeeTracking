@@ -11,6 +11,7 @@ namespace EmployeeTracking.Application.Interfaces
         IPTOBalanceRepository PTOBalances { get; }
         IPayPeriodRepository PayPeriods { get; }
         IPayrollReportRepository PayrollReports { get; }
+        INotificationRepository Notifications { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }

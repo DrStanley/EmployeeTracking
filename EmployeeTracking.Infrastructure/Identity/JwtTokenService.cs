@@ -34,7 +34,7 @@ namespace EmployeeTracking.Infrastructure.Identity
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
+                expires: DateTime.Now.AddMinutes(
                                         double.Parse(_config["Jwt:ExpiryMinutes"]!)),
                 signingCredentials: new SigningCredentials(
                                         key, SecurityAlgorithms.HmacSha256));

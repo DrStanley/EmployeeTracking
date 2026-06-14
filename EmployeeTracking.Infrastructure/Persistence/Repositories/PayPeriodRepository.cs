@@ -15,7 +15,7 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
 
         public async Task<PayPeriod?> GetCurrentAsync(CancellationToken ct = default)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateOnly.FromDateTime(DateTime.Now);
             return await _context.PayPeriods
                 .FirstOrDefaultAsync(
                     p => p.StartDate <= today && p.EndDate >= today, ct);

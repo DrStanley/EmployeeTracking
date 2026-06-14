@@ -53,7 +53,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
             var entry = _factory.CreateClockIn(
                 request.EmployeeId,
                 request.Source,
-                DateTimeOffset.UtcNow,
+                DateTimeOffset.Now,
                 location);
 
             await _uow.TimeEntries.AddAsync(entry, ct);

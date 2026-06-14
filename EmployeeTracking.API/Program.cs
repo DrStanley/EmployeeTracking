@@ -3,8 +3,10 @@ using EmployeeTracking.API.Middleware;
 using EmployeeTracking.Application.Behaviours;
 using EmployeeTracking.Application.Interfaces;
 using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Infrastructure.BackgroundJobs;
 using EmployeeTracking.Infrastructure.Identity;
 using EmployeeTracking.Infrastructure.Persistence;
+using EmployeeTracking.Infrastructure.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -122,6 +124,14 @@ builder.Services.AddScoped<ITimesheetCalculationService, TimesheetCalculationSer
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,ForbiddenResponseHandler>();
 builder.Services.AddScoped<IOvertimeStrategy, StandardOvertimeStrategy>();
 
+// Notification service
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Background jobs
+builder.Services.AddHostedService<MissedPunchJob>();
+builder.Services.AddHostedService<PTOAccrualJob>();
+builder.Services.AddHostedService<OvertimeAlertJob>();
+
 // ── Swagger──
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -222,7 +232,7 @@ using (var scope = app.Services.CreateScope())
     }
     if (!db.PayPeriods.Any())
     {
-        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var now = DateOnly.FromDateTime(DateTime.Now);
         var start = new DateOnly(now.Year, now.Month, 1);
         var end = start.AddMonths(1).AddDays(-1);
 
@@ -236,7 +246,7 @@ using (var scope = app.Services.CreateScope())
         var employees = db.Employees.ToList();
         foreach (var emp in employees)
         {
-            var balance = PTOBalance.CreateForYear(emp.Id, DateTime.UtcNow.Year);
+            var balance = PTOBalance.CreateForYear(emp.Id, DateTime.Now.Year);
             balance.Accrue(80m); // seed with 80 hours (2 weeks)
             db.PTOBalances.Add(balance);
         }

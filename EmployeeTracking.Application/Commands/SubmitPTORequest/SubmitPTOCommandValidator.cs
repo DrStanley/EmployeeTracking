@@ -11,7 +11,7 @@ namespace EmployeeTracking.Application.Commands.SubmitPTORequest
 
             RuleFor(x => x.StartDate)
                 .NotEmpty()
-                .Must(d => d >= DateOnly.FromDateTime(DateTime.UtcNow))
+                .Must(d => d >= DateOnly.FromDateTime(DateTime.Now))
                 .WithMessage("Start date must be today or in the future.");
 
             RuleFor(x => x.EndDate)
