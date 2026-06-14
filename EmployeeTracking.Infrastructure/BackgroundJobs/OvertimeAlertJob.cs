@@ -61,7 +61,7 @@ namespace EmployeeTracking.Infrastructure.BackgroundJobs
             var weekStart = today.AddDays(-(int)today.DayOfWeek + 1);
             var from = new DateTimeOffset(
                 weekStart.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-            var to = DateTimeOffset.Now;
+            var to = DateTimeOffset.UtcNow;
 
             var employees = await uow.Employees.GetAllAsync(ct);
             var payloads = new List<NotificationPayload>();

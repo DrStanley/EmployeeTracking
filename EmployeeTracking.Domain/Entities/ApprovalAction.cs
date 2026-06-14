@@ -26,7 +26,7 @@ namespace EmployeeTracking.Domain.Entities
                 ReviewerId = reviewerId,
                 Decision = decision,
                 Notes = notes,
-                DecidedAt = DateTimeOffset.Now
+                DecidedAt = DateTimeOffset.UtcNow
             };
     }
 }

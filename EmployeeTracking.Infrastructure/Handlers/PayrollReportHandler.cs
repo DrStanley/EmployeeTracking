@@ -160,7 +160,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 TotalUnpaidHours: lines.Sum(l => l.UnpaidHours),
                 TotalEmployees: lines.Count,
                 TotalExceptions: lines.Count(l => l.HasExceptions),
-                GeneratedAt: DateTimeOffset.Now);
+                GeneratedAt: DateTimeOffset.UtcNow);
         }
     }
 
@@ -198,7 +198,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 TotalUnpaidHours: lines.Sum(l => l.UnpaidHours),
                 TotalEmployees: lines.Count,
                 TotalExceptions: lines.Count(l => l.HasExceptions),
-                GeneratedAt: DateTimeOffset.Now);
+                GeneratedAt: DateTimeOffset.UtcNow);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace EmployeeTracking.Infrastructure.BackgroundJobs
 
                 if (openEntry is null) continue;
 
-                var hoursOpen = (DateTimeOffset.Now - openEntry.Timestamp).TotalHours;
+                var hoursOpen = (DateTimeOffset.UtcNow - openEntry.Timestamp).TotalHours;
                 if (hoursOpen < 10) continue;
 
                 _logger.LogWarning(

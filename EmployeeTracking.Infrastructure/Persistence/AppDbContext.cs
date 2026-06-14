@@ -39,9 +39,9 @@ namespace EmployeeTracking.Infrastructure.Persistence
             foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
             {
                 if (entry.State == EntityState.Added)
-                    entry.Entity.CreatedAt = DateTimeOffset.Now;
+                    entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
                 if (entry.State is EntityState.Added or EntityState.Modified)
-                    entry.Entity.UpdatedAt = DateTimeOffset.Now;
+                    entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
             }
             return await base.SaveChangesAsync(ct);
         }

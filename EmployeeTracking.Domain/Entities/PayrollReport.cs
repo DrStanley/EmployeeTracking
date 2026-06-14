@@ -41,7 +41,7 @@ namespace EmployeeTracking.Domain.Entities
                 TotalPayableHours = regular + overtime + pto,
                 HasExceptions = exceptionNotes != null,
                 ExceptionNotes = exceptionNotes,
-                GeneratedAt = DateTimeOffset.Now
+                GeneratedAt = DateTimeOffset.UtcNow
             };
     }
 }

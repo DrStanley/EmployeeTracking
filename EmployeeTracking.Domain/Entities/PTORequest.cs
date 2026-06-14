@@ -44,7 +44,7 @@ namespace EmployeeTracking.Domain.Entities
             Status = PTORequestStatus.Approved;
             ReviewedBy = reviewerId;
             ReviewerNotes = notes;
-            ReviewedAt = DateTimeOffset.Now;
+            ReviewedAt = DateTimeOffset.UtcNow;
         }
 
         public void Reject(Guid reviewerId, string reason)
@@ -54,7 +54,7 @@ namespace EmployeeTracking.Domain.Entities
             Status = PTORequestStatus.Rejected;
             ReviewedBy = reviewerId;
             ReviewerNotes = reason;
-            ReviewedAt = DateTimeOffset.Now;
+            ReviewedAt = DateTimeOffset.UtcNow;
         }
 
         public void Cancel()

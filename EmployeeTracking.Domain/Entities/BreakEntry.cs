@@ -21,7 +21,7 @@ namespace EmployeeTracking.Domain.Entities
                 Id = Guid.NewGuid(),
                 TimeEntryId = timeEntryId,
                 EmployeeId = employeeId,
-                BreakStart = DateTimeOffset.Now,
+                BreakStart = DateTimeOffset.UtcNow,
                 IsPaid = isPaid
             };
 
@@ -29,7 +29,7 @@ namespace EmployeeTracking.Domain.Entities
         {
             if (BreakEnd.HasValue)
                 throw new DomainException("Break has already ended.");
-            BreakEnd = DateTimeOffset.Now;
+            BreakEnd = DateTimeOffset.UtcNow;
         }
 
         public decimal DurationHours =>
