@@ -255,10 +255,9 @@ namespace EmployeeTracking.Infrastructure.Services
             string employeeName, string email, string temporaryPassword) =>
             Wrap("Welcome to Employee Tracking System", $"""
             <p>Hi <strong>{employeeName}</strong>,</p>
-            <p>Your employee account has been created. Here are your login details:</p>
+            <p>Your employee account has been created. Here are your details:</p>
             <div class="info-box">
               <strong>Email:</strong>    {email}<br/>
-              <strong>Password:</strong> {temporaryPassword}
             </div>
             <p><strong>Please change your password immediately after your first login.</strong></p>
             """);

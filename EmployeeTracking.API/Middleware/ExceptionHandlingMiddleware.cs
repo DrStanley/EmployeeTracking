@@ -31,31 +31,30 @@ namespace EmployeeTracking.API.Middleware
 
         private async Task HandleAsync(HttpContext ctx, Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+            _logger.LogError(ex, "Unhandled exception on {Method} {Path}",
+                ctx.Request.Method, ctx.Request.Path);
 
             var (status, title) = ex switch
             {
-                NotFoundException => (StatusCodes.Status404NotFound,
-                                                "Resource not found"),
-                DomainException => (StatusCodes.Status422UnprocessableEntity,
-                                                "Business rule violation"),
-                UnauthorizedAccessException => (StatusCodes.Status401Unauthorized,
-                                                "Unauthorized"),
+                NotFoundException => (404, "Resource not found"),
+                DomainException => (422, "Business rule violation"),
+                UnauthorizedAccessException => (401, "Unauthorized"),
                 FluentValidation.ValidationException
-                                            => (StatusCodes.Status400BadRequest,
-                                                "Validation failed"),
-                _ => (StatusCodes.Status500InternalServerError,
-                                                "An unexpected error occurred")
+                                            => (400, "Validation failed"),
+                _ => (500, "An unexpected error occurred")
             };
 
             var problem = new ProblemDetails
             {
                 Status = status,
                 Title = title,
-                Detail = ex.Message
+                // Only expose message for known domain exceptions
+                // Never expose raw exception details for 500s
+                Detail = status == 500
+                    ? "An internal error occurred. Please contact support."
+                    : ex.Message
             };
 
-            // validation errors 
             if (ex is FluentValidation.ValidationException ve)
             {
                 problem.Extensions["errors"] = ve.Errors
@@ -64,6 +63,10 @@ namespace EmployeeTracking.API.Middleware
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToArray());
             }
+
+            // Add a correlation ID so support can trace the error in logs
+            var correlationId = ctx.TraceIdentifier;
+            problem.Extensions["correlationId"] = correlationId;
 
             ctx.Response.StatusCode = status;
             ctx.Response.ContentType = "application/problem+json";

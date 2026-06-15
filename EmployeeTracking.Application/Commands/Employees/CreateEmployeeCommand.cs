@@ -10,6 +10,7 @@ namespace EmployeeTracking.Application.Commands.Employees
      string Email,
      string JobTitle,
      Guid DepartmentId,
+     Guid ManagerId,
      Guid AttendancePolicyId,
      EmploymentType EmploymentType,
      string CreatedByEmail,
@@ -23,6 +24,7 @@ namespace EmployeeTracking.Application.Commands.Employees
      string Email,
      string JobTitle,
      Guid DepartmentId,
+     Guid ManagerId,
      Guid AttendancePolicyId,
      EmploymentType EmploymentType,
      string? ReferredByEmail

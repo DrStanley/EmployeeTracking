@@ -15,6 +15,7 @@ namespace EmployeeTracking.Tests.Unit.Domain
                 email: email,
                 jobTitle: "Developer",
                 departmentId: Guid.NewGuid(),
+                managerId: Guid.NewGuid(),
                 attendancePolicyId: Guid.NewGuid(),
                 employmentType: EmploymentType.FullTime);
 

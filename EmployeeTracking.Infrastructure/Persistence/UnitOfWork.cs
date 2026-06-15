@@ -20,6 +20,8 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public IShiftRepository Shifts { get; }
         public IHolidayRepository Holidays { get; }
         public IOvertimeRuleRepository OvertimeRules { get; }
+        public IRefreshTokenRepository RefreshTokens { get; }
+
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -35,6 +37,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
             Shifts = new ShiftRepository(context);
             Holidays = new HolidayRepository(context);
             OvertimeRules = new OvertimeRuleRepository(context);
+            RefreshTokens = new RefreshTokenRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

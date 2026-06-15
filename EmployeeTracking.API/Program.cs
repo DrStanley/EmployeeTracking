@@ -13,11 +13,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Resend;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opts =>
 {
     opts.Password.RequireDigit = true;
     opts.Password.RequiredLength = 8;
+    opts.Password.RequireUppercase = true;
+    opts.Password.RequireNonAlphanumeric = true;
+
+    // Lock account after 5 failed attempts for 5 minutes
+    opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    opts.Lockout.MaxFailedAccessAttempts = 5;
+    opts.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -54,15 +63,20 @@ builder.Services.AddAuthentication(opts =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-                                       Encoding.UTF8.GetBytes(jwtKey))
+                                       Encoding.UTF8.GetBytes(jwtKey)),
+        // Prevent clock skew from rejecting valid tokens
+        ClockSkew = TimeSpan.Zero
     };
 
-    // Return clean ProblemDetails for 401
     opts.Events = new JwtBearerEvents
     {
         OnChallenge = async ctx =>
         {
             ctx.HandleResponse();
+
+            // Log the exact reason so you can see it in the console
+            var reason = ctx.AuthenticateFailure?.Message ?? "Unknown";
+            Console.WriteLine($"[JWT 401] {reason}");
 
             var problem = new ProblemDetails
             {
@@ -92,8 +106,39 @@ builder.Services.AddAuthentication(opts =>
             ctx.Response.ContentType = "application/problem+json";
 
             await ctx.Response.WriteAsJsonAsync(problem);
+        },
+
+        // Add this — logs exactly why token validation failed
+        OnAuthenticationFailed = ctx =>
+        {
+            Console.WriteLine($"[JWT Auth Failed] {ctx.Exception.Message}");
+            return Task.CompletedTask;
         }
     };
+});
+
+
+builder.Services.AddRateLimiter(opts =>
+{
+    // Strict limit on auth endpoints — 5 requests per minute per IP
+    opts.AddFixedWindowLimiter("auth", o =>
+    {
+        o.PermitLimit = 5;
+        o.Window = TimeSpan.FromMinutes(1);
+        o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        o.QueueLimit = 0;
+    });
+
+    // General API limit — 100 requests per minute per IP
+    opts.AddFixedWindowLimiter("api", o =>
+    {
+        o.PermitLimit = 100;
+        o.Window = TimeSpan.FromMinutes(1);
+        o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        o.QueueLimit = 2;
+    });
+
+    opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 // ── MediatR + Validation Pipeline 
@@ -109,8 +154,22 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 builder.Services.AddValidatorsFromAssembly(
     typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
+// CORS
+builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                builder.Configuration.GetSection("AllowedOrigins")
+                    .Get<string[]>() ?? Array.Empty<string>())
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
 
-// ── AutoMapper ────────
+// AutoMapper
 //builder.Services.AddAutoMapper(
 //    typeof(EmployeeTracking.Application.AssemblyReference).Assembly);
 builder.Services.AddAutoMapper(cfg => { },
@@ -122,7 +181,7 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITimeEntryFactory, TimeEntryFactory>();
 builder.Services.AddScoped<ITimesheetCalculationService, TimesheetCalculationService>();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler,ForbiddenResponseHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, ForbiddenResponseHandler>();
 builder.Services.AddScoped<IOvertimeStrategy, StandardOvertimeStrategy>();
 
 // Notification service
@@ -143,8 +202,9 @@ builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>(
 builder.Services.AddHostedService<MissedPunchJob>();
 builder.Services.AddHostedService<PTOAccrualJob>();
 builder.Services.AddHostedService<OvertimeAlertJob>();
+builder.Services.AddHostedService<TokenCleanupJob>();
 
-// ── Swagger──
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -201,15 +261,19 @@ builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
+app.UseRateLimiter();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseHsts();
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

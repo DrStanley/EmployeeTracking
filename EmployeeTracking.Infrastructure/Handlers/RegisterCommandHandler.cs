@@ -66,14 +66,20 @@ namespace EmployeeTracking.Infrastructure.Handlers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _jwtTokenService.GenerateToken(user.Id, user.Email!, user.EmployeeId, roles);
+            var accessToken = _jwtTokenService.GenerateAccessToken(
+                user.Id, user.Email!, user.EmployeeId, roles);
+            var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id);
+
+            await _uow.RefreshTokens.AddAsync(refreshToken, ct);
+            await _uow.SaveChangesAsync(ct);
 
             return new AuthResponse(
-                Token: token,
+                AccessToken: accessToken,
+                RefreshToken: refreshToken.Token,
                 Email: user.Email!,
                 FullName: $"{request.FirstName} {request.LastName}",
-                Roles: request.Roles,
-                ExpiresAt: DateTime.Now.AddMinutes(60));
+                Roles: roles,
+                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15));
         }
     }
 }

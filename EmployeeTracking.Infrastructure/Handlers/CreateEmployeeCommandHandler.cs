@@ -60,6 +60,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 request.Email,
                 request.JobTitle,
                 request.DepartmentId,
+                request.ManagerId,
                 request.AttendancePolicyId,
                 request.EmploymentType,
                 createdByUser.Id,

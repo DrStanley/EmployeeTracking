@@ -14,14 +14,15 @@ namespace EmployeeTracking.Tests.Unit.Application
     {
         private readonly Mock<IUnitOfWork> _uow = new();
         private readonly SubmitPTOCommandHandler _handler;
+        private readonly Mock<IEmailNotificationService> _emailSevices = new();
 
         public SubmitPTOCommandHandlerTests()
-            => _handler = new SubmitPTOCommandHandler(_uow.Object);
+            => _handler = new SubmitPTOCommandHandler(_uow.Object, _emailSevices.Object);
 
         private static Employee BuildEmployee() =>
             Employee.Create(
                 "EMP001", "Jane", "Doe", "jane@test.com",
-                "Developer", Guid.NewGuid(), Guid.NewGuid(),
+                "Developer", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
                 EmploymentType.FullTime);
 
         [Fact]
@@ -29,11 +30,14 @@ namespace EmployeeTracking.Tests.Unit.Application
         {
             var employeeId = Guid.NewGuid();
             var employee = BuildEmployee();
+            var manager = BuildEmployee();
             var balance = PTOBalance.CreateForYear(employeeId, DateTime.UtcNow.Year);
             balance.Accrue(80m);
 
             _uow.Setup(u => u.Employees.GetByIdAsync(employeeId, default))
                 .ReturnsAsync(employee);
+            _uow.Setup(u => u.Employees.GetByIdAsync(employee.ManagerId.Value, default))
+                .ReturnsAsync(manager);
             _uow.Setup(u => u.PTOBalances.GetByEmployeeAndYearAsync(
                 employeeId, DateTime.UtcNow.Year, default))
                 .ReturnsAsync(balance);
@@ -45,7 +49,8 @@ namespace EmployeeTracking.Tests.Unit.Application
                 It.IsAny<PTORequest>(), default))
                 .Returns(Task.CompletedTask);
             _uow.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
-
+            _emailSevices.Setup(e=>e.SendPTORequestSubmittedAsync(
+                It.IsAny<PTORequest>(), It.IsAny<Employee>(), It.IsAny<Employee>(), default)).Returns(Task.CompletedTask);
             var start = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
             var end = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
             var command = new SubmitPTOCommand(employeeId, start, end, 40m, "Vacation");

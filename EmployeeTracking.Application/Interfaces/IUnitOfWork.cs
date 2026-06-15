@@ -16,6 +16,8 @@ namespace EmployeeTracking.Application.Interfaces
         IShiftRepository Shifts { get; }
         IHolidayRepository Holidays { get; }
         IOvertimeRuleRepository OvertimeRules { get; }
+        IRefreshTokenRepository RefreshTokens { get; }
+
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }
 }

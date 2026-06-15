@@ -29,7 +29,7 @@ namespace EmployeeTracking.Tests.Unit.Application
         {
             var emp = Employee.Create(
                 "EMP001", "John", "Doe", "john@test.com",
-                "Developer", Guid.NewGuid(), Guid.NewGuid(),
+                "Developer", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
                 EmploymentType.FullTime);
             return emp;
         }

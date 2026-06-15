@@ -26,6 +26,7 @@ namespace EmployeeTracking.API.Controllers
                 requuest.Email,
                 requuest.JobTitle,
                 requuest.DepartmentId,
+                requuest.ManagerId,
                 requuest.AttendancePolicyId,
                 requuest.EmploymentType,
                 User.FindFirstValue(ClaimTypes.Email) ?? throw new UnauthorizedAccessException("Email claim missing from token."),
