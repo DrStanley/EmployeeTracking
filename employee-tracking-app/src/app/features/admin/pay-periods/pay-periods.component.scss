@@ -1,0 +1,24 @@
+@use '../../../../styles/admin-panel';
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.period-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid transparent;
+
+  &.current { border-left-color: var(--color-primary); }
+}
+
+.period-info h4 { margin-bottom: 2px; display: inline; }
+
+.lock-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+}

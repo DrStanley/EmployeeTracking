@@ -1,0 +1,105 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Overtime Rules</h1>
+      <p class="text-secondary">Configure daily and weekly overtime thresholds per policy</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Add Rule
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (rules().length === 0) {
+    <app-empty-state icon="bolt" title="No overtime rules" message="Add a rule to start applying overtime calculations."></app-empty-state>
+  } @else {
+    @for (rule of rules(); track rule.id) {
+      <div class="card rule-card">
+        <div class="rule-head" (click)="toggleExpand(rule.id)">
+          <div>
+            <h4>{{ rule.attendancePolicyName }}</h4>
+            <p class="text-sm text-muted">
+              Daily: {{ rule.dailyThresholdHours }}h · Weekly: {{ rule.weeklyThresholdHours }}h · {{ rule.premiumMultiplier }}x premium
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            @if (rule.hasDoubleTime) {
+              <span class="badge badge-violet">2x after {{ rule.doubleTimeDailyThreshold }}h</span>
+            }
+            <mat-icon>{{ expandedId() === rule.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </div>
+        </div>
+
+        @if (expandedId() === rule.id) {
+          <div class="rule-details">
+            <div class="detail-row">
+              <span>Daily Threshold</span>
+              <input type="number" [value]="rule.dailyThresholdHours"
+                (change)="updateRule(rule, 'dailyThresholdHours', +$any($event.target).value)" class="mini-input">
+            </div>
+            <div class="detail-row">
+              <span>Weekly Threshold</span>
+              <input type="number" [value]="rule.weeklyThresholdHours"
+                (change)="updateRule(rule, 'weeklyThresholdHours', +$any($event.target).value)" class="mini-input">
+            </div>
+            <div class="detail-row">
+              <span>Premium Multiplier</span>
+              <input type="number" step="0.1" [value]="rule.premiumMultiplier"
+                (change)="updateRule(rule, 'premiumMultiplier', +$any($event.target).value)" class="mini-input">
+            </div>
+            <div class="flex justify-end" style="margin-top: 12px;">
+              <button class="btn btn-ghost btn-sm" (click)="remove(rule)">
+                <mat-icon>delete</mat-icon> Delete Rule
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>Add Overtime Rule</h3>
+          <button class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          <div class="field">
+            <label>Attendance Policy</label>
+            <select formControlName="attendancePolicyId" class="input">
+              <option value="">Select a policy</option>
+              @for (p of policies(); track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Daily Threshold (h)</label>
+              <input type="number" formControlName="dailyThresholdHours" class="input">
+            </div>
+            <div class="field">
+              <label>Weekly Threshold (h)</label>
+              <input type="number" formControlName="weeklyThresholdHours" class="input">
+            </div>
+          </div>
+          <div class="field">
+            <label>Premium Multiplier</label>
+            <input type="number" step="0.1" formControlName="premiumMultiplier" class="input">
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" formControlName="hasDoubleTime"> Enable double time
+          </label>
+          <div class="field">
+            <label>Double Time Daily Threshold (h)</label>
+            <input type="number" formControlName="doubleTimeDailyThreshold" class="input">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Save Rule</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

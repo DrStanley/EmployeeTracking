@@ -1,0 +1,90 @@
+<div class="page-content">
+  <h1>Time Tracking</h1>
+  <p class="text-secondary" style="margin-bottom: 24px;">Clock in and out, manage breaks</p>
+
+  <div class="tracking-layout">
+    <div class="card clock-card">
+      <div class="clock-display monospace">{{ now() | date: 'HH:mm:ss' }}</div>
+      <p class="clock-date">{{ now() | date: 'EEEE, MMMM d, y' }}</p>
+
+      <div class="status-row">
+        <span class="status-dot"
+          [class.green]="status() === 'clocked-in'"
+          [class.gray]="status() === 'clocked-out'"
+          [class.yellow]="status() === 'on-break'"></span>
+        <span class="status-text">
+          @switch (status()) {
+            @case ('clocked-in') { Clocked In — {{ duration() }} }
+            @case ('on-break')   { On Break — {{ duration() }} }
+            @default              { Clocked Out }
+          }
+        </span>
+      </div>
+
+      @if (errorMsg()) {
+        <div class="error-banner">{{ errorMsg() }}</div>
+      }
+
+      <div class="actions">
+        @if (status() === 'clocked-out') {
+          <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="clockIn()">
+            <mat-icon>login</mat-icon> Clock In
+          </button>
+        }
+        @if (status() === 'clocked-in') {
+          <div class="flex gap-3">
+            <button class="btn btn-secondary btn-lg flex-1" [disabled]="loading()" (click)="startBreak()">
+              <mat-icon>free_breakfast</mat-icon> Start Break
+            </button>
+            <button class="btn btn-danger btn-lg flex-1" [disabled]="loading()" (click)="clockOut()">
+              <mat-icon>logout</mat-icon> Clock Out
+            </button>
+          </div>
+        }
+        @if (status() === 'on-break') {
+          <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="endBreak()">
+            <mat-icon>play_arrow</mat-icon> End Break
+          </button>
+        }
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="settings-row">
+        <label class="toggle">
+          <input type="checkbox" [checked]="includeLocation()" (change)="toggleLocation()">
+          <span>Include location</span>
+        </label>
+
+        <select class="source-select" [value]="source()" (change)="source.set(+$any($event.target).value)">
+          @for (s of sources; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 16px;">Today's Timeline</h3>
+      <div class="timeline">
+        <div class="timeline-node" [class.active]="clockedInAt()">
+          <div class="node-dot"></div>
+          <span class="node-label">Clock In</span>
+          <span class="node-time">{{ clockedInAt() ? (clockedInAt() | date:'HH:mm') : '—' }}</span>
+        </div>
+        <div class="timeline-line"></div>
+        <div class="timeline-node" [class.active]="breakStartedAt()">
+          <div class="node-dot"></div>
+          <span class="node-label">Break</span>
+          <span class="node-time">{{ breakStartedAt() ? (breakStartedAt() | date:'HH:mm') : '—' }}</span>
+        </div>
+        <div class="timeline-line"></div>
+        <div class="timeline-node">
+          <div class="node-dot"></div>
+          <span class="node-label">Clock Out</span>
+          <span class="node-time">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Shifts</h1>
+      <p class="text-secondary">Define scheduled work hours and grace periods</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Add Shift
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (shifts().length === 0) {
+    <app-empty-state icon="event_note" title="No shifts defined" message="Create a shift to assign to employees."></app-empty-state>
+  } @else {
+    <div class="cards-grid">
+      @for (s of shifts(); track s.id) {
+        <div class="card shift-card">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4>{{ s.name }}</h4>
+              <p class="text-secondary text-sm">{{ s.plannedStart }} – {{ s.plannedEnd }}</p>
+            </div>
+            <span class="badge" [class.badge-green]="s.isActive" [class.badge-gray]="!s.isActive">
+              {{ s.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <p class="text-muted text-sm" style="margin: 12px 0;">Grace period: {{ s.gracePeriodMinutes }} min</p>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost btn-sm" (click)="openEdit(s)"><mat-icon>edit</mat-icon> Edit</button>
+            <button class="btn btn-ghost btn-sm" (click)="toggleActive(s)">
+              <mat-icon>{{ s.isActive ? 'visibility_off' : 'visibility' }}</mat-icon>
+              {{ s.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>{{ editingId() ? 'Edit' : 'Add' }} Shift</h3>
+          <button class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          <div class="field">
+            <label>Shift Name</label>
+            <input formControlName="name" class="input" placeholder="Morning Shift">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Start Time</label>
+              <input type="time" formControlName="plannedStart" class="input">
+            </div>
+            <div class="field">
+              <label>End Time</label>
+              <input type="time" formControlName="plannedEnd" class="input">
+            </div>
+          </div>
+          <div class="field">
+            <label>Grace Period (minutes)</label>
+            <input type="number" formControlName="gracePeriodMinutes" class="input">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Save Shift</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

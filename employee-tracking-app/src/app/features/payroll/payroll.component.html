@@ -1,0 +1,110 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Payroll Reports</h1>
+      <p class="text-secondary">View hours summaries and generate payroll-ready reports</p>
+    </div>
+    @if (store.isAdmin()) {
+      <button class="btn btn-primary" [disabled]="generating() || !payPeriodId()" (click)="generate()">
+        @if (generating()) { <mat-icon class="spin">progress_activity</mat-icon> }
+        <mat-icon>refresh</mat-icon> Generate Report
+      </button>
+    }
+  </div>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="flex gap-3 items-center">
+      <input
+        type="text"
+        placeholder="Pay Period ID"
+        class="period-input"
+        [ngModel]="payPeriodId()"
+        (ngModelChange)="payPeriodId.set($event)">
+      <button class="btn btn-secondary" (click)="load()">
+        <mat-icon>search</mat-icon> Load Report
+      </button>
+    </div>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="card error-card">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="table"></app-loading-skeleton>
+  } @else if (report()) {
+    <div class="grid-cols-4" style="margin-bottom: 24px;">
+      <div class="card stat-mini">
+        <span class="stat-mini-label">Employees</span>
+        <span class="stat-mini-value">{{ report()!.totalEmployees }}</span>
+      </div>
+      <div class="card stat-mini">
+        <span class="stat-mini-label">Regular Hours</span>
+        <span class="stat-mini-value">{{ report()!.totalRegularHours }}h</span>
+      </div>
+      <div class="card stat-mini">
+        <span class="stat-mini-label">Overtime</span>
+        <span class="stat-mini-value text-warning">{{ report()!.totalOvertimeHours }}h</span>
+      </div>
+      <div class="card stat-mini">
+        <span class="stat-mini-label">Exceptions</span>
+        <span class="stat-mini-value text-danger">{{ report()!.totalExceptions }}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex justify-between items-center" style="margin-bottom: 16px;">
+        <h3>{{ report()!.payPeriodName }}</h3>
+        <button class="btn btn-ghost btn-sm" (click)="exportCsv()">
+          <mat-icon>download</mat-icon> Export CSV
+        </button>
+      </div>
+
+      <table class="payroll-table">
+        <thead>
+          <tr>
+            <th>Employee</th><th>Dept</th><th>Regular</th><th>OT</th><th>PTO</th><th>Total</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of report()!.lines; track line.employeeId) {
+            <tr [class.exception-row]="line.hasExceptions">
+              <td>{{ line.employeeFullName }}</td>
+              <td class="text-muted">{{ line.department }}</td>
+              <td>{{ line.regularHours }}h</td>
+              <td class="text-warning">{{ line.overtimeHours }}h</td>
+              <td class="text-blue">{{ line.ptoHours }}h</td>
+              <td class="font-semibold">{{ line.totalPayableHours }}h</td>
+              <td>
+                <span class="badge" [class.badge-green]="line.timesheetStatus === 'Approved'" [class.badge-yellow]="line.timesheetStatus !== 'Approved'">
+                  {{ line.timesheetStatus }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card chart-card">
+      <h4 style="margin-bottom: 16px;">Hours by Employee</h4>
+      <div class="chart-scroll">
+        @for (line of report()!.lines; track line.employeeId) {
+          <div class="chart-col">
+            <div class="stacked-bar">
+              <div class="bar-segment regular" [style.height.px]="(line.regularHours / maxBarHours()) * 140"></div>
+              <div class="bar-segment overtime" [style.height.px]="(line.overtimeHours / maxBarHours()) * 140"></div>
+            </div>
+            <span class="chart-label">{{ line.employeeFullName.split(' ')[0] }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <app-empty-state
+      icon="bar_chart"
+      title="No report loaded"
+      message="Enter a pay period ID above and load or generate a report.">
+    </app-empty-state>
+  }
+</div>

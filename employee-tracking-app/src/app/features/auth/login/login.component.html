@@ -1,0 +1,68 @@
+<div class="auth-page">
+  <div class="auth-card animate-fade-in">
+    <div class="brand">
+      <div class="brand-icon">
+        <mat-icon>schedule</mat-icon>
+      </div>
+      <span class="brand-name">Employee Tracking</span>
+    </div>
+
+    <h2>Welcome back</h2>
+    <p class="subtitle">Sign in to your account</p>
+
+    @if (store.error()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ store.error() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-wrap">
+          <mat-icon>mail_outline</mat-icon>
+          <input id="email" type="email" formControlName="email" placeholder="you@company.com" autocomplete="email">
+        </div>
+        @if (form.get('email')?.touched && form.get('email')?.invalid) {
+          <span class="field-error">Enter a valid email address</span>
+        }
+      </div>
+
+      <div class="field">
+        <div class="flex justify-between items-center">
+          <label for="password">Password</label>
+          <a href="javascript:void(0)" class="forgot-link">Forgot password?</a>
+        </div>
+        <div class="input-wrap">
+          <mat-icon>lock_outline</mat-icon>
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password">
+          <button type="button" class="icon-toggle" (click)="togglePassword()">
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        @if (form.get('password')?.touched && form.get('password')?.invalid) {
+          <span class="field-error">Password is required</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="store.isLoading()">
+        @if (store.isLoading()) {
+          <mat-icon class="spin">progress_activity</mat-icon>
+        }
+        <span>Sign in</span>
+      </button>
+    </form>
+
+    <div class="divider"></div>
+
+    <p class="footer-text">
+      Don't have an account? <a routerLink="/register">Register</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,265 @@
+:host { display: block; height: 100vh; }
+
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-normal);
+  flex-shrink: 0;
+  z-index: 100;
+
+  @media (max-width: 768px) { display: none; }
+}
+
+.sidebar-closed .sidebar { width: 72px; }
+
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--color-primary);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  .material-icons { color: white; font-size: 20px; }
+}
+
+.logo-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); display: block; }
+.logo-sub   { font-size: 11px; color: var(--color-text-muted); display: block; }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+  }
+
+  &.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    .nav-icon { color: var(--color-primary); }
+  }
+}
+
+.nav-icon { font-size: 20px; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.avatar {
+  width: 36px; height: 36px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+  .user-name { font-size: 13px; font-weight: 600; color: var(--color-text-primary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--color-text-muted); display: block; }
+}
+
+.user-menu {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  margin-top: 4px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  .material-icons { font-size: 18px; }
+  &:hover { background: var(--color-background); color: var(--color-text-primary); }
+  &.danger:hover { background: var(--color-danger-light); color: var(--color-danger); }
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast);
+  .material-icons { font-size: 20px; }
+  &:hover { background: var(--color-background); color: var(--color-text-primary); }
+}
+
+// ── Main Area ──────────────────────────────────────────────────────────────────
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.topbar {
+  height: var(--topbar-height);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.topbar-left, .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  .home-icon { font-size: 16px; color: var(--color-text-muted); }
+  .separator  { color: var(--color-text-muted); }
+  .current    { color: var(--color-text-primary); font-weight: 500; }
+}
+
+.progress-bar {
+  height: 2px;
+  background: var(--color-border);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 40%;
+  background: var(--color-primary);
+  animation: progress 1.2s ease-in-out infinite;
+}
+@keyframes progress {
+  0%   { left: -40%; }
+  100% { left: 100%; }
+}
+
+.loading-indicator {
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--content-padding);
+
+  @media (max-width: 768px) {
+    padding: 16px;
+    padding-bottom: 80px; // space for bottom nav
+  }
+}
+
+// ── Mobile Bottom Nav ──────────────────────────────────────────────────────────
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  z-index: 200;
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 10px;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast);
+  .material-icons { font-size: 22px; }
+  &.active {
+    color: var(--color-primary);
+  }
+}

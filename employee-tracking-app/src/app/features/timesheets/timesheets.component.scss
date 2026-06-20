@@ -1,0 +1,79 @@
+.ts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.rejection-banner {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.hours-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 20px;
+}
+
+.hours-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.total { margin-left: auto; text-align: right; }
+}
+
+.hours-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hours-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  td {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .text-center { text-align: center; padding: 24px; }
+}
+
+.ts-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.approval-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; margin-top: 2px; }
+}

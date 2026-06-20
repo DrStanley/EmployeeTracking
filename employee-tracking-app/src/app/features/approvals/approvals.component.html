@@ -1,0 +1,117 @@
+<div class="page-content">
+  <h1>Approvals</h1>
+  <p class="text-secondary" style="margin-bottom: 24px;">Review and act on pending requests from your team</p>
+
+  <div class="tab-bar">
+    <button class="tab" [class.active]="activeTab() === 'timesheets'" (click)="activeTab.set('timesheets')">
+      Timesheets ({{ timesheets().length }})
+    </button>
+    <button class="tab" [class.active]="activeTab() === 'pto'" (click)="activeTab.set('pto')">
+      PTO Requests ({{ ptoRequests().length }})
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="list"></app-loading-skeleton>
+  } @else {
+
+    @if (activeTab() === 'timesheets') {
+      @if (timesheets().length === 0) {
+        <app-empty-state icon="task_alt" title="All caught up" message="No timesheets are pending your approval."></app-empty-state>
+      } @else {
+        @for (ts of timesheets(); track ts.id) {
+          <div class="card approval-card">
+            <div class="approval-head" (click)="toggleExpand(ts.id)">
+              <div class="avatar">{{ ts.employeeFullName.charAt(0) }}</div>
+              <div class="flex-1">
+                <p class="font-semibold">{{ ts.employeeFullName }}</p>
+                <p class="text-sm text-muted">{{ ts.payPeriodName }} — submitted {{ ts.submittedAt | date:'mediumDate' }}</p>
+              </div>
+              <div class="hours-pill">
+                {{ ts.totalRegularHours + ts.totalOvertimeHours }}h
+              </div>
+              <mat-icon>{{ expandedId() === ts.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </div>
+
+            @if (expandedId() === ts.id) {
+              <table class="mini-table">
+                <thead><tr><th>Date</th><th>Regular</th><th>OT</th><th>PTO</th></tr></thead>
+                <tbody>
+                  @for (line of ts.lines; track line.id) {
+                    <tr>
+                      <td>{{ line.workDate | date:'EEE, MMM d' }}</td>
+                      <td>{{ line.regularHours }}h</td>
+                      <td>{{ line.overtimeHours }}h</td>
+                      <td>{{ line.ptoHours }}h</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+
+            @if (rejectingId() === ts.id) {
+              <div class="reject-form">
+                <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                  placeholder="Reason for rejection..." rows="2" class="reject-textarea"></textarea>
+                <div class="flex gap-2">
+                  <button class="btn btn-danger btn-sm" (click)="confirmRejectTimesheet(ts)">Confirm Reject</button>
+                  <button class="btn btn-ghost btn-sm" (click)="cancelReject()">Cancel</button>
+                </div>
+              </div>
+            } @else {
+              <div class="approval-actions">
+                <button class="btn btn-success btn-sm" (click)="approveTimesheet(ts)">
+                  <mat-icon>check</mat-icon> Approve
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="startReject(ts.id)">
+                  <mat-icon>close</mat-icon> Reject
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+
+    @if (activeTab() === 'pto') {
+      @if (ptoRequests().length === 0) {
+        <app-empty-state icon="task_alt" title="All caught up" message="No PTO requests are pending your approval."></app-empty-state>
+      } @else {
+        @for (req of ptoRequests(); track req.id) {
+          <div class="card approval-card">
+            <div class="approval-head">
+              <div class="avatar">{{ req.employeeFullName.charAt(0) }}</div>
+              <div class="flex-1">
+                <p class="font-semibold">{{ req.employeeFullName }}</p>
+                <p class="text-sm text-muted">
+                  {{ req.startDate | date:'MMM d' }} – {{ req.endDate | date:'MMM d, y' }} · {{ req.hoursRequested }}h
+                </p>
+                @if (req.notes) { <p class="text-sm text-muted">"{{ req.notes }}"</p> }
+              </div>
+            </div>
+
+            @if (rejectingId() === req.id) {
+              <div class="reject-form">
+                <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                  placeholder="Reason for rejection..." rows="2" class="reject-textarea"></textarea>
+                <div class="flex gap-2">
+                  <button class="btn btn-danger btn-sm" (click)="confirmRejectPTO(req)">Confirm Reject</button>
+                  <button class="btn btn-ghost btn-sm" (click)="cancelReject()">Cancel</button>
+                </div>
+              </div>
+            } @else {
+              <div class="approval-actions">
+                <button class="btn btn-success btn-sm" (click)="approvePTO(req)">
+                  <mat-icon>check</mat-icon> Approve
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="startReject(req.id)">
+                  <mat-icon>close</mat-icon> Reject
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  }
+</div>

@@ -1,0 +1,42 @@
+@use '../../../../styles/admin-panel';
+
+.rule-card { margin-bottom: 12px; }
+
+.rule-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+
+  h4 { margin-bottom: 2px; }
+}
+
+.rule-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.mini-input {
+  width: 90px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 8px;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: right;
+
+  &:focus { outline: none; border-color: var(--color-primary); }
+}

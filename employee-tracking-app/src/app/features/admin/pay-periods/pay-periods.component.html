@@ -1,0 +1,65 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Pay Periods</h1>
+      <p class="text-secondary">Define pay periods and lock them once payroll is finalized</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Create Period
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="list"></app-loading-skeleton>
+  } @else if (periods().length === 0) {
+    <app-empty-state icon="date_range" title="No pay periods" message="Create your first pay period to begin tracking timesheets."></app-empty-state>
+  } @else {
+    <div class="timeline-list">
+      @for (p of periods(); track p.id) {
+        <div class="card period-card" [class.current]="isCurrent(p)">
+          <div class="period-info">
+            <div class="flex items-center gap-2">
+              <h4>{{ p.name }}</h4>
+              @if (isCurrent(p)) { <span class="badge badge-blue">Current</span> }
+              @if (p.isLocked) { <span class="badge badge-dark"><mat-icon class="lock-icon">lock</mat-icon> Locked</span> }
+            </div>
+            <p class="text-sm text-muted">{{ p.startDate | date:'MMM d' }} – {{ p.endDate | date:'MMM d, y' }}</p>
+          </div>
+          @if (!p.isLocked) {
+            <button class="btn btn-secondary btn-sm" (click)="lock(p)">
+              <mat-icon>lock</mat-icon> Lock Period
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>Create Pay Period</h3>
+          <button class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          <div class="field">
+            <label>Period Name</label>
+            <input formControlName="name" class="input" placeholder="February 2024">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Start Date</label>
+              <input type="date" formControlName="startDate" class="input">
+            </div>
+            <div class="field">
+              <label>End Date</label>
+              <input type="date" formControlName="endDate" class="input">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Create Period</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

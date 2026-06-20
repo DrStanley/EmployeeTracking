@@ -1,0 +1,103 @@
+<div class="page-content">
+  <h1>My Timesheets</h1>
+  <p class="text-secondary" style="margin-bottom: 24px;">Review and submit your timesheet for the current pay period</p>
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (!timesheet()) {
+    <app-empty-state
+      icon="calendar_month"
+      title="No timesheet yet"
+      message="Your timesheet for this pay period hasn't been created. It will appear once you start clocking in.">
+    </app-empty-state>
+  } @else {
+    <div class="card">
+      <div class="ts-header">
+        <div>
+          <h3>{{ timesheet()!.payPeriodName }}</h3>
+          <p class="text-secondary text-sm">Employee: {{ timesheet()!.employeeFullName }}</p>
+        </div>
+        <app-status-badge [status]="timesheet()!.status"></app-status-badge>
+      </div>
+
+      @if (timesheet()!.status === TimesheetStatus.Rejected && timesheet()!.rejectionReason) {
+        <div class="rejection-banner">
+          <strong>Rejection reason:</strong> {{ timesheet()!.rejectionReason }}
+        </div>
+      }
+
+      @if (errorMsg()) {
+        <div class="rejection-banner">{{ errorMsg() }}</div>
+      }
+
+      <div class="hours-summary">
+        <div class="hours-item">
+          <span class="hours-label">Regular</span>
+          <span class="hours-value">{{ timesheet()!.totalRegularHours }}h</span>
+        </div>
+        <div class="hours-item">
+          <span class="hours-label">Overtime</span>
+          <span class="hours-value text-warning">{{ timesheet()!.totalOvertimeHours }}h</span>
+        </div>
+        <div class="hours-item">
+          <span class="hours-label">PTO</span>
+          <span class="hours-value text-blue">{{ timesheet()!.totalPTOHours }}h</span>
+        </div>
+        <div class="hours-item total">
+          <span class="hours-label">Total</span>
+          <span class="hours-value">
+            {{ timesheet()!.totalRegularHours + timesheet()!.totalOvertimeHours + timesheet()!.totalPTOHours }}h
+          </span>
+        </div>
+      </div>
+
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Regular</th><th>Overtime</th><th>Break</th><th>PTO</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of timesheet()!.lines; track line.id) {
+            <tr>
+              <td>{{ line.workDate | date:'EEE, MMM d' }}</td>
+              <td>{{ line.regularHours }}h</td>
+              <td>{{ line.overtimeHours }}h</td>
+              <td>{{ line.breakHours }}h</td>
+              <td>{{ line.ptoHours }}h</td>
+              <td class="text-muted">{{ line.notes || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="text-muted text-center">No daily entries yet</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="ts-actions">
+        @if (timesheet()!.status === TimesheetStatus.Draft || timesheet()!.status === TimesheetStatus.Rejected) {
+          <button class="btn btn-primary" (click)="submit()">
+            <mat-icon>send</mat-icon>
+            {{ timesheet()!.status === TimesheetStatus.Rejected ? 'Resubmit' : 'Submit for Approval' }}
+          </button>
+        }
+      </div>
+
+      @if (timesheet()!.approvalHistory.length > 0) {
+        <div class="divider"></div>
+        <h4 style="margin-bottom: 12px;">Approval History</h4>
+        @for (action of timesheet()!.approvalHistory; track action.decidedAt) {
+          <div class="approval-row">
+            <mat-icon [class.text-success]="action.decision === 0" [class.text-danger]="action.decision === 1">
+              {{ action.decision === 0 ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            <div>
+              <p class="text-sm">{{ action.reviewerFullName }} — {{ action.decision === 0 ? 'Approved' : 'Rejected' }}</p>
+              @if (action.notes) { <p class="text-xs text-muted">{{ action.notes }}</p> }
+              <p class="text-xs text-muted">{{ action.decidedAt | date:'medium' }}</p>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

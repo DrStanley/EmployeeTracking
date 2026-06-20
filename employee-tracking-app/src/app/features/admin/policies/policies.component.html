@@ -1,0 +1,97 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Attendance Policies</h1>
+      <p class="text-secondary">Configure overtime thresholds, breaks, and PTO accrual rules</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Create Policy
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="table"></app-loading-skeleton>
+  } @else if (policies().length === 0) {
+    <app-empty-state icon="rule" title="No policies yet" message="Create your first attendance policy to get started."></app-empty-state>
+  } @else {
+    <div class="card">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Name</th><th>Daily OT</th><th>Weekly OT</th><th>Multiplier</th><th>PTO/Period</th><th>Max Balance</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (p of policies(); track p.id) {
+            <tr>
+              <td class="font-semibold">{{ p.name }}</td>
+              <td>{{ p.dailyOvertimeThresholdHours }}h</td>
+              <td>{{ p.weeklyOvertimeThresholdHours }}h</td>
+              <td>{{ p.overtimeMultiplier }}x</td>
+              <td>{{ p.ptoAccrualRatePerPayPeriod }}h</td>
+              <td>{{ p.maxPTOBalanceHours }}h</td>
+              <td class="actions-cell">
+                <button class="btn btn-ghost btn-sm" (click)="openEdit(p)"><mat-icon>edit</mat-icon></button>
+                <button class="btn btn-ghost btn-sm" (click)="remove(p)"><mat-icon>delete</mat-icon></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>{{ editingId() ? 'Edit' : 'Create' }} Policy</h3>
+          <button class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          <div class="field">
+            <label>Policy Name</label>
+            <input formControlName="name" class="input">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Daily OT Threshold (h)</label>
+              <input type="number" formControlName="dailyOvertimeThresholdHours" class="input">
+            </div>
+            <div class="field">
+              <label>Weekly OT Threshold (h)</label>
+              <input type="number" formControlName="weeklyOvertimeThresholdHours" class="input">
+            </div>
+          </div>
+          <div class="field">
+            <label>Overtime Multiplier</label>
+            <input type="number" step="0.1" formControlName="overtimeMultiplier" class="input">
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" formControlName="hasPaidBreaks"> Paid breaks
+          </label>
+          <div class="row">
+            <div class="field">
+              <label>Paid Break (min)</label>
+              <input type="number" formControlName="paidBreakMinutes" class="input">
+            </div>
+            <div class="field">
+              <label>Unpaid Break (min)</label>
+              <input type="number" formControlName="unpaidBreakMinutes" class="input">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>PTO Accrual / Period (h)</label>
+              <input type="number" formControlName="ptoAccrualRatePerPayPeriod" class="input">
+            </div>
+            <div class="field">
+              <label>Max PTO Balance (h)</label>
+              <input type="number" formControlName="maxPTOBalanceHours" class="input">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Save Policy</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

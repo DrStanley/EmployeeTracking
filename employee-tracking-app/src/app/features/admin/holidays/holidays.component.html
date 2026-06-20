@@ -1,0 +1,70 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Holiday Calendar</h1>
+      <p class="text-secondary">Manage company holidays and recurring observances</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Add Holiday
+    </button>
+  </div>
+
+  <div class="year-selector">
+    <button class="btn btn-ghost btn-sm" (click)="changeYear(-1)"><mat-icon>chevron_left</mat-icon></button>
+    <span class="year-label">{{ year() }}</span>
+    <button class="btn btn-ghost btn-sm" (click)="changeYear(1)"><mat-icon>chevron_right</mat-icon></button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="table"></app-loading-skeleton>
+  } @else if (holidays().length === 0) {
+    <app-empty-state icon="event" title="No holidays" [message]="'No holidays configured for ' + year()"></app-empty-state>
+  } @else {
+    <div class="card">
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Date</th><th>Recurring</th><th></th></tr></thead>
+        <tbody>
+          @for (h of holidays(); track h.id) {
+            <tr>
+              <td class="font-semibold">{{ h.name }}</td>
+              <td>{{ h.date | date:'EEEE, MMMM d' }}</td>
+              <td>
+                <span class="badge" [class.badge-blue]="h.isRecurringAnnually" [class.badge-gray]="!h.isRecurringAnnually">
+                  {{ h.isRecurringAnnually ? 'Yearly' : 'One-time' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button class="btn btn-ghost btn-sm" (click)="remove(h)"><mat-icon>delete</mat-icon></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>Add Holiday</h3>
+          <button class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          <div class="field">
+            <label>Holiday Name</label>
+            <input formControlName="name" class="input" placeholder="Christmas Day">
+          </div>
+          <div class="field">
+            <label>Date</label>
+            <input type="date" formControlName="date" class="input">
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" formControlName="isRecurringAnnually"> Recurs every year
+          </label>
+          <button type="submit" class="btn btn-primary btn-full">Save Holiday</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

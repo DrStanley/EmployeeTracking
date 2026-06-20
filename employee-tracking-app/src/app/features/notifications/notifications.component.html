@@ -1,0 +1,37 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>Notifications</h1>
+      <p class="text-secondary">Stay up to date with approvals, alerts, and reminders</p>
+    </div>
+    <button class="btn btn-ghost btn-sm" (click)="markAllRead()">
+      <mat-icon>done_all</mat-icon> Mark all read
+    </button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
+    <button class="tab" [class.active]="filter() === 'unread'" (click)="filter.set('unread')">Unread</button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="list"></app-loading-skeleton>
+  } @else if (filtered().length === 0) {
+    <app-empty-state icon="notifications_none" title="No notifications" message="You're all caught up!"></app-empty-state>
+  } @else {
+    <div class="notif-list">
+      @for (n of filtered(); track n.id) {
+        <div class="card notif-item" [class.unread]="!n.isRead" (click)="markRead(n)">
+          <div class="notif-icon" [ngClass]="iconFor(n.type).cssClass">
+            <mat-icon>{{ iconFor(n.type).icon }}</mat-icon>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm">{{ n.message }}</p>
+            <p class="text-xs text-muted">{{ n.sentAt | date:'medium' }}</p>
+          </div>
+          @if (!n.isRead) { <div class="unread-dot"></div> }
+        </div>
+      }
+    </div>
+  }
+</div>

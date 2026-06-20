@@ -1,0 +1,134 @@
+.tracking-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clock-card {
+  text-align: center;
+}
+
+.clock-display {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.02em;
+}
+
+.clock-date {
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
+  &.green  { background: var(--color-success); animation: pulse 2s infinite; }
+  &.gray   { background: var(--color-text-muted); }
+  &.yellow { background: var(--color-warning); animation: pulse 2s infinite; }
+}
+
+.status-text {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.error-banner {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.actions {
+  margin-bottom: 16px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  input { width: 16px; height: 16px; }
+}
+
+.source-select {
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+}
+
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0.4;
+
+  &.active { opacity: 1; }
+}
+
+.node-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+
+.timeline-node.active .node-dot {
+  background: var(--color-primary);
+}
+
+.node-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.node-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.timeline-line {
+  flex: 1;
+  height: 2px;
+  background: var(--color-border);
+  margin: 0 8px;
+  margin-bottom: 24px;
+}

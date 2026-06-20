@@ -1,0 +1,49 @@
+<div class="table-wrap">
+  @if (loading) {
+    <app-loading-skeleton type="table"></app-loading-skeleton>
+  } @else if (data.length === 0) {
+    <app-empty-state [title]="emptyTitle" [message]="emptyMessage" icon="inbox"></app-empty-state>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+            <th [style.width]="col.width" [class.sortable]="col.sortable" (click)="toggleSort(col)">
+              <span>{{ col.label }}</span>
+              @if (col.sortable) {
+                <mat-icon class="sort-icon" [class.active]="sortKey() === col.key">
+                  {{ sortKey() === col.key && sortDir() === 'desc' ? 'arrow_downward' : 'arrow_upward' }}
+                </mat-icon>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of pagedData(); track row) {
+          @if (rowTpl) {
+            <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: row }"></ng-container>
+          } @else {
+            <tr>
+              @for (col of columns; track col.key) {
+                <td>{{ cellValue(row, col) }}</td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="btn btn-ghost btn-sm" [disabled]="page() === 0" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon> Previous
+        </button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="btn btn-ghost btn-sm" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">
+          Next <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+</div>

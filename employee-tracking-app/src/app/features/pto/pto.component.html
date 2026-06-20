@@ -1,0 +1,99 @@
+<div class="page-content">
+  <h1>Time Off</h1>
+  <p class="text-secondary" style="margin-bottom: 24px;">Request and manage your paid time off</p>
+
+  <div class="pto-layout">
+    <div class="card balance-card">
+      <h3 style="margin-bottom: 16px;">PTO Balance</h3>
+      @if (loading()) {
+        <app-loading-skeleton type="card"></app-loading-skeleton>
+      } @else {
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--color-border)" stroke-width="12"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--color-success)" stroke-width="12"
+              stroke-dasharray="314" [attr.stroke-dashoffset]="314 - (314 * balancePct() / 100)"
+              stroke-linecap="round" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="donut-center">
+            <span class="donut-value">{{ balance()?.availableHours ?? 0 }}h</span>
+            <span class="donut-label">available</span>
+          </div>
+        </div>
+        <div class="balance-legend">
+          <div class="legend-item"><span class="dot green"></span> Available: {{ balance()?.availableHours ?? 0 }}h</div>
+          <div class="legend-item"><span class="dot blue"></span> Used: {{ balance()?.usedHours ?? 0 }}h</div>
+          <div class="legend-item"><span class="dot gray"></span> Accrued: {{ balance()?.accruedHours ?? 0 }}h</div>
+        </div>
+      }
+    </div>
+
+    <div class="card form-card">
+      <h3 style="margin-bottom: 16px;">Request Time Off</h3>
+
+      @if (errorMsg()) {
+        <div class="error-banner">{{ errorMsg() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="pto-form">
+        <div class="row">
+          <div class="field">
+            <label>Start date</label>
+            <input type="date" formControlName="startDate" class="date-input">
+          </div>
+          <div class="field">
+            <label>End date</label>
+            <input type="date" formControlName="endDate" class="date-input">
+          </div>
+        </div>
+        <div class="field">
+          <label>Hours requested</label>
+          <input type="number" formControlName="hoursRequested" class="date-input" min="1">
+        </div>
+        <div class="field">
+          <label>Notes (optional)</label>
+          <textarea formControlName="notes" rows="2" class="textarea" placeholder="e.g. Family vacation"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="submitting()">
+          @if (submitting()) { <mat-icon class="spin">progress_activity</mat-icon> }
+          Submit Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 16px;">My Requests</h3>
+
+    @if (loading()) {
+      <app-loading-skeleton type="table"></app-loading-skeleton>
+    } @else if (requests().length === 0) {
+      <app-empty-state
+        icon="event_busy"
+        title="No time off requests yet"
+        message="Submit your first PTO request using the form above.">
+      </app-empty-state>
+    } @else {
+      <table class="pto-table">
+        <thead>
+          <tr><th>Dates</th><th>Hours</th><th>Status</th><th>Submitted</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (r of requests(); track r.id) {
+            <tr>
+              <td>{{ r.startDate | date:'MMM d' }} – {{ r.endDate | date:'MMM d, y' }}</td>
+              <td>{{ r.hoursRequested }}h</td>
+              <td><app-status-badge [status]="r.status"></app-status-badge></td>
+              <td class="text-muted">{{ r.createdAt | date:'mediumDate' }}</td>
+              <td>
+                @if (r.status === PTORequestStatus.Pending || r.status === PTORequestStatus.Approved) {
+                  <button class="btn btn-ghost btn-sm" (click)="cancel(r)">Cancel</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
