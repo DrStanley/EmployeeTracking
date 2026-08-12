@@ -2,6 +2,7 @@
 using EmployeeTracking.Application.Commands.Timesheets;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Queries.Timesheets;
+using EmployeeTracking.Infrastructure.Handlers.Admin;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -81,5 +82,12 @@ namespace EmployeeTracking.API.Controllers
         public async Task<IActionResult> Pending(CancellationToken ct)
             => Ok(await _mediator.Send(
                 new GetPendingApprovalsQuery(User.GetEmployeeId()), ct));
+
+        /// <summary>Get all pay periods — available to all authenticated users.</summary>
+        [HttpGet("pay-periods")]
+        [Authorize]
+        [ProducesResponseType(typeof(IReadOnlyList<PayPeriodDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPayPeriods(CancellationToken ct)
+            => Ok(await _mediator.Send(new GetAllPayPeriodsQuery(), ct));
     }
 }

@@ -8,58 +8,66 @@
           <span class="material-icons">schedule</span>
         </div>
         @if (sidebarOpen()) {
-          <div class="logo-text">
-            <span class="logo-title">EmpTrack</span>
-            <span class="logo-sub">Time Tracking</span>
-          </div>
+        <div class="logo-text">
+          <span class="logo-title">EmpTrack</span>
+          <span class="logo-sub">Time Tracking</span>
+        </div>
         }
       </div>
     </div>
 
-    <nav class="sidebar-nav">
+    <!-- Main nav items -->
+    <nav class="nav">
       @for (item of visibleNavItems(); track item.route) {
-        <a
-          class="nav-item"
-          [routerLink]="item.route"
-          [class.active]="isActive(item.route)"
-          [attr.title]="!sidebarOpen() ? item.label : null"
-        >
-          <span class="material-icons nav-icon">{{ item.icon }}</span>
-          @if (sidebarOpen()) {
-            <span class="nav-label">{{ item.label }}</span>
-          }
-        </a>
+      <a class="nav-item" [class.active]="currentPath().startsWith(item.route)" [routerLink]="item.route"
+        [title]="isCollapsed() ? item.label : ''">
+        <mat-icon>{{ item.icon }}</mat-icon>
+      @if (sidebarOpen()) {  <span>{{ item.label }}</span>}
+      </a>
       }
     </nav>
 
+    <!-- Admin section — only shown to Admins -->
+    @if (store.isAdmin()) {
+    <div class="nav-section-label">Admin</div>
+    <nav class="nav">
+      @for (item of adminNavItems; track item.route) {
+      <a class="nav-item" [class.active]="currentPath() === item.route" [routerLink]="item.route"
+        [title]="isCollapsed() ? item.label : ''">
+        <mat-icon>{{ item.icon }}</mat-icon>
+      @if (sidebarOpen()) {  <span>{{ item.label }}</span>}
+      </a>
+      }
+    </nav>
+    }
     <div class="sidebar-footer">
       @if (sidebarOpen()) {
-        <div class="user-info">
-          <div class="avatar">{{ getInitials() }}</div>
-          <div class="user-details">
-            <span class="user-name">{{ store.user()?.fullName }}</span>
-            <span class="user-role">{{ store.primaryRole() }}</span>
-          </div>
-          <button class="icon-btn" (click)="toggleUserMenu()" aria-label="User menu">
-            <span class="material-icons">more_vert</span>
-          </button>
+      <div class="user-info">
+        <div class="avatar">{{ getInitials() }}</div>
+        <div class="user-details">
+          <span class="user-name">{{ store.user()?.fullName }}</span>
+          <span class="user-role">{{ store.primaryRole() }}</span>
         </div>
-        @if (userMenuOpen()) {
-          <div class="user-menu">
-            <button class="menu-item" (click)="toggleDarkMode()">
-              <span class="material-icons">{{ darkMode() ? 'light_mode' : 'dark_mode' }}</span>
-              {{ darkMode() ? 'Light Mode' : 'Dark Mode' }}
-            </button>
-            <button class="menu-item danger" (click)="confirmLogout()">
-              <span class="material-icons">logout</span>
-              Sign Out
-            </button>
-          </div>
-        }
-      } @else {
-        <button class="icon-btn" (click)="confirmLogout()" aria-label="Sign out" title="Sign out">
-          <span class="material-icons">logout</span>
+        <button class="icon-btn" (click)="toggleUserMenu()" aria-label="User menu">
+          <span class="material-icons">more_vert</span>
         </button>
+      </div>
+      @if (userMenuOpen()) {
+      <div class="user-menu">
+        <button class="menu-item" (click)="toggleDarkMode()">
+          <span class="material-icons">{{ darkMode() ? 'light_mode' : 'dark_mode' }}</span>
+          {{ darkMode() ? 'Light Mode' : 'Dark Mode' }}
+        </button>
+        <button class="menu-item danger" (click)="confirmLogout()">
+          <span class="material-icons">logout</span>
+          Sign Out
+        </button>
+      </div>
+      }
+      } @else {
+      <button class="icon-btn" (click)="confirmLogout()" aria-label="Sign out" title="Sign out">
+        <span class="material-icons">logout</span>
+      </button>
       }
     </div>
   </aside>
@@ -82,16 +90,13 @@
 
       <div class="topbar-right">
         @if (loading.isLoading()) {
-          <div class="loading-indicator">
-            <div class="spinner"></div>
-          </div>
+        <div class="loading-indicator">
+          <div class="spinner"></div>
+        </div>
         }
         <app-notification-bell></app-notification-bell>
-        <button
-          class="icon-btn"
-          (click)="toggleDarkMode()"
-          [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
-        >
+        <button class="icon-btn" (click)="toggleDarkMode()"
+          [attr.aria-label]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'">
           <span class="material-icons">{{ darkMode() ? 'light_mode' : 'dark_mode' }}</span>
         </button>
       </div>
@@ -99,9 +104,9 @@
 
     <!-- Progress bar -->
     @if (loading.isLoading()) {
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
     }
 
     <!-- Page Content -->
@@ -113,10 +118,10 @@
   <!-- Mobile Bottom Nav -->
   <nav class="mobile-nav" aria-label="Mobile navigation">
     @for (item of visibleNavItems().slice(0, 5); track item.route) {
-      <a class="mobile-nav-item" [routerLink]="item.route" [class.active]="isActive(item.route)">
-        <span class="material-icons">{{ item.icon }}</span>
-        <span class="mobile-label">{{ item.label }}</span>
-      </a>
+    <a class="mobile-nav-item" [routerLink]="item.route" [class.active]="isActive(item.route)">
+      <span class="material-icons">{{ item.icon }}</span>
+      <span class="mobile-label">{{ item.label }}</span>
+    </a>
     }
   </nav>
 

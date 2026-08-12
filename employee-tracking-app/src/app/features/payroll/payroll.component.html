@@ -5,22 +5,26 @@
       <p class="text-secondary">View hours summaries and generate payroll-ready reports</p>
     </div>
     @if (store.isAdmin()) {
-      <button class="btn btn-primary" [disabled]="generating() || !payPeriodId()" (click)="generate()">
-        @if (generating()) { <mat-icon class="spin">progress_activity</mat-icon> }
-        <mat-icon>refresh</mat-icon> Generate Report
-      </button>
+    <button class="btn btn-primary" [disabled]="generating() || !selectedPeriod()" (click)="generate()">
+      @if (generating()) { <mat-icon class="spin">progress_activity</mat-icon> }
+      <mat-icon>refresh</mat-icon> Generate Report
+    </button>
     }
   </div>
 
   <div class="card" style="margin-bottom: 24px;">
     <div class="flex gap-3 items-center">
-      <input
-        type="text"
-        placeholder="Pay Period ID"
-        class="period-input"
-        [ngModel]="payPeriodId()"
-        (ngModelChange)="payPeriodId.set($event)">
-      <button class="btn btn-secondary" (click)="load()">
+      <select class="period-select flex-1" (change)="onPeriodChange($event)" [disabled]="payPeriods().length === 0">
+        @if (payPeriods().length === 0) {
+        <option>Loading pay periods...</option>
+        }
+        @for (p of payPeriods(); track p.id) {
+        <option [value]="p.id" [selected]="p.id === selectedPeriod()?.id">
+          {{ p.name }} {{ p.isLocked ? '(Locked)' : '' }}
+        </option>
+        }
+      </select>
+      <button class="btn btn-secondary" [disabled]="!selectedPeriod()" (click)="load()">
         <mat-icon>search</mat-icon> Load Report
       </button>
     </div>

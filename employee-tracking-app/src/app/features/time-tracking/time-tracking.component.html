@@ -8,43 +8,41 @@
       <p class="clock-date">{{ now() | date: 'EEEE, MMMM d, y' }}</p>
 
       <div class="status-row">
-        <span class="status-dot"
-          [class.green]="status() === 'clocked-in'"
-          [class.gray]="status() === 'clocked-out'"
+        <span class="status-dot" [class.green]="status() === 'clocked-in'" [class.gray]="status() === 'clocked-out'"
           [class.yellow]="status() === 'on-break'"></span>
         <span class="status-text">
           @switch (status()) {
-            @case ('clocked-in') { Clocked In — {{ duration() }} }
-            @case ('on-break')   { On Break — {{ duration() }} }
-            @default              { Clocked Out }
+          @case ('clocked-in') { Clocked In — {{ duration() }} }
+          @case ('on-break') { On Break — {{ duration() }} }
+          @default { Clocked Out }
           }
         </span>
       </div>
 
       @if (errorMsg()) {
-        <div class="error-banner">{{ errorMsg() }}</div>
+      <div class="error-banner">{{ errorMsg() }}</div>
       }
 
       <div class="actions">
         @if (status() === 'clocked-out') {
-          <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="clockIn()">
-            <mat-icon>login</mat-icon> Clock In
-          </button>
+        <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="clockIn()">
+          <mat-icon>login</mat-icon> Clock In
+        </button>
         }
         @if (status() === 'clocked-in') {
-          <div class="flex gap-3">
-            <button class="btn btn-secondary btn-lg flex-1" [disabled]="loading()" (click)="startBreak()">
-              <mat-icon>free_breakfast</mat-icon> Start Break
-            </button>
-            <button class="btn btn-danger btn-lg flex-1" [disabled]="loading()" (click)="clockOut()">
-              <mat-icon>logout</mat-icon> Clock Out
-            </button>
-          </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary btn-lg flex-1" [disabled]="loading()" (click)="startBreak()">
+            <mat-icon>free_breakfast</mat-icon> Start Break
+          </button>
+          <button class="btn btn-danger btn-lg flex-1" [disabled]="loading()" (click)="clockOut()">
+            <mat-icon>logout</mat-icon> Clock Out
+          </button>
+        </div>
         }
         @if (status() === 'on-break') {
-          <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="endBreak()">
-            <mat-icon>play_arrow</mat-icon> End Break
-          </button>
+        <button class="btn btn-primary btn-lg btn-full" [disabled]="loading()" (click)="endBreak()">
+          <mat-icon>play_arrow</mat-icon> End Break
+        </button>
         }
       </div>
 
@@ -58,12 +56,48 @@
 
         <select class="source-select" [value]="source()" (change)="source.set(+$any($event.target).value)">
           @for (s of sources; track s.value) {
-            <option [value]="s.value">{{ s.label }}</option>
+          <option [value]="s.value">{{ s.label }}</option>
           }
         </select>
       </div>
     </div>
+    <div class="card" style="margin-top: 24px;">
+      <h3 style="margin-bottom: 16px;">Today's Punches</h3>
 
+      @if (todayEntries().length === 0) {
+      <p class="text-muted text-sm">No entries recorded today.</p>
+      } @else {
+      <table class="punches-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Time</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of todayEntries(); track entry.id; let i = $index) {
+          <tr [class.clock-in]="entry.entryType === 0" [class.clock-out]="entry.entryType === 1"
+            [class.on-break]="entry.entryType === 2 || entry.entryType === 3">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-green':  entry.entryType === 0,
+                'badge-red':    entry.entryType === 1,
+                'badge-yellow': entry.entryType === 2 || entry.entryType === 3
+              }">
+                {{ ['Clock In','Clock Out','Break Start','Break End','Correction'][entry.entryType] }}
+              </span>
+            </td>
+            <td class="monospace">{{ entry.timestamp | date:'HH:mm:ss' }}</td>
+            <td class="text-muted text-sm">{{ ['Web','Mobile','Kiosk','Manager','System'][entry.source] }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </div>
     <div class="card">
       <h3 style="margin-bottom: 16px;">Today's Timeline</h3>
       <div class="timeline">

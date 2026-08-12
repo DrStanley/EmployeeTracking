@@ -2,6 +2,7 @@
 using EmployeeTracking.Application.Commands.ClockIn;
 using EmployeeTracking.Application.Commands.ClockOut;
 using EmployeeTracking.Application.DTOs;
+using EmployeeTracking.Application.Queries.Timesheets;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +69,23 @@ namespace EmployeeTracking.API.Controllers
                 Latitude: request.Latitude,
                 Longitude: request.Longitude,
                 DeviceId: request.DeviceId), ct));
+        /// <summary>Start a break for the authenticated employee.</summary>
+        [HttpPost("break-start")]
+        [Authorize(Roles = "Employee,Manager")]
+        [ProducesResponseType(typeof(BreakStartResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> BreakStart(CancellationToken ct)
+            => Ok(await _mediator.Send(
+                new BreakStartCommand(User.GetEmployeeId()), ct));
+
+        /// <summary>End the current break for the authenticated employee.</summary>
+        [HttpPost("break-end")]
+        [Authorize(Roles = "Employee,Manager")]
+        [ProducesResponseType(typeof(BreakEndResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> BreakEnd(CancellationToken ct)
+            => Ok(await _mediator.Send(
+                new BreakEndCommand(User.GetEmployeeId()), ct));
 
         /// <summary>Clock out the authenticated employee.</summary>
         /// <remarks>
@@ -118,5 +136,24 @@ namespace EmployeeTracking.API.Controllers
                 Latitude: request.Latitude,
                 Longitude: request.Longitude,
                 DeviceId: request.DeviceId), ct));
+
+        /// <summary>Get the current clock status for the authenticated employee.</summary>
+        [HttpGet("clock-status")]
+        [Authorize(Roles = "Employee,Manager")]
+        public async Task<IActionResult> ClockStatus(CancellationToken ct)
+        {
+            return Ok(await _mediator.Send(new GetClockStatus(
+                EmployeeId: User.GetEmployeeId()
+            ), ct));
+        }
+        /// <summary>Get today's time entries for the authenticated employee.</summary>
+        [HttpGet("today")]
+        [Authorize(Roles = "Employee,Manager")]
+        public async Task<IActionResult> Today(CancellationToken ct)
+        {
+            return Ok(await _mediator.Send(new GetTodayClockDetails(
+                EmployeeId: User.GetEmployeeId()
+            ), ct));
+        }
     }
 }

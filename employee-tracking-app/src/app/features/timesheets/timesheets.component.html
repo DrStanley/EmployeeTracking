@@ -1,9 +1,26 @@
 <div class="page-content">
   <h1>My Timesheets</h1>
-  <p class="text-secondary" style="margin-bottom: 24px;">Review and submit your timesheet for the current pay period</p>
+  <p class="text-secondary" style="margin-bottom: 24px;">
+    Review and submit your timesheet for the current pay period
+  </p>
+
+  <!-- Pay period selector -->
+  @if (payPeriods().length > 0) {
+  <div class="card period-selector">
+    <label class="text-sm font-semibold">Pay Period</label>
+    <select (change)="onPeriodChange($event)" class="period-select">
+      @for (p of payPeriods(); track p.id) {
+      <option [value]="p.id" [selected]="p.id === selectedPeriod()?.id">
+        {{ p.name }}
+        @if (p.isLocked) { (Locked) }
+      </option>
+      }
+    </select>
+  </div>
+  }
 
   @if (loading()) {
-    <app-loading-skeleton type="card"></app-loading-skeleton>
+  <app-loading-skeleton type="card"></app-loading-skeleton>
   } @else if (!timesheet()) {
     <app-empty-state
       icon="calendar_month"

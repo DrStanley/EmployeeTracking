@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -14,7 +14,7 @@ import { environment } from '../../../../environments/environment';
   imports: [CommonModule, RouterModule, MatBadgeModule, TimeAgoPipe],
   template: `
     <div class="bell-wrap" [class.open]="isOpen()">
-      <button class="bell-btn" (click)="toggle()" [attr.aria-label]="'Notifications, ' + unread() + ' unread'">
+      <button class="bell-btn" (click)="toggleDropdown($event)" [attr.aria-label]="'Notifications, ' + unread() + ' unread'">
         <span class="material-icons">notifications</span>
         @if (unread() > 0) {
           <span class="badge">{{ unread() > 99 ? '99+' : unread() }}</span>
@@ -165,7 +165,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   private pollSub?: Subscription;
   private clickHandler = () => this.isOpen.set(false);
-
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.isOpen.set(false);
+  }
   ngOnInit(): void {
     this.load();
     this.pollSub = interval(environment.notificationPollInterval).subscribe(() => this.load());
@@ -178,7 +181,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   }
 
   toggle(): void { this.isOpen.update(v => !v); if (this.isOpen()) this.load(); }
-
+  toggleDropdown(event: Event): void {
+    event.stopPropagation();  // ← prevent click from bubbling to document and closing immediately
+    this.isOpen.update(v => !v);
+  }
   private load(): void {
     this.svc.getAll(true).subscribe({
       next: (data) => {

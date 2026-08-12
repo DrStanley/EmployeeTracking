@@ -11,5 +11,5 @@ namespace EmployeeTracking.Application.Commands.ClockIn
         double? Latitude,
         double? Longitude,
         string? DeviceId
-    ) : IRequest<ClockInResponse>;
+    ) : IRequest<ClockInResponse>;  
 }

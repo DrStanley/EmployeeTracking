@@ -6,7 +6,7 @@ import { ClockInRequest, ClockInResponse, ClockOutResponse, TimeEntry } from '..
 @Injectable({ providedIn: 'root' })
 export class TimeEntryService {
   private readonly http = inject(HttpClient);
-  private readonly url  = '/timeentries';
+  private readonly url = '/TimeEntry';
 
   clockIn(req: ClockInRequest): Observable<ClockInResponse> {
     return this.http.post<ClockInResponse>(`${this.url}/clock-in`, req);
@@ -19,5 +19,16 @@ export class TimeEntryService {
   }
   breakEnd(): Observable<ClockInResponse> {
     return this.http.post<ClockInResponse>(`${this.url}/break-end`, {});
+  }
+  getMyEntries(): Observable<TimeEntry[]> {
+    return this.http.get<TimeEntry[]>(`${this.url}/my`);
+  }
+  getClockStatus(): Observable<{ status: string; clockedInAt?: string; breakStartedAt?: string }> {
+    return this.http.get<{ status: string; clockedInAt?: string; breakStartedAt?: string }>(
+      `${this.url}/clock-status`
+    );
+  }
+  getTodayEntries(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.url}/today`);
   }
 }

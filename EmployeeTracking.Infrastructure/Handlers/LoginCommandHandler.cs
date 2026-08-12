@@ -42,6 +42,13 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             if (!result.Succeeded)
                 throw new UnauthorizedAccessException("Invalid email or password.");
+            // Get the employee record to use the real full name
+            var employee = user.EmployeeId != Guid.Empty
+                ? await _uow.Employees.GetByIdAsync(user.EmployeeId, ct)
+                : null;
+
+            var fullName = employee?.FullName ?? user.Email!;
+
 
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _jwtTokenService.GenerateAccessToken(
@@ -59,7 +66,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 AccessToken: accessToken,
                 RefreshToken: refreshToken.Token,
                 Email: user.Email!,
-                FullName: user.UserName ?? user.Email!,
+                FullName:fullName!,
                 Roles: roles,
                 AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15));
         }

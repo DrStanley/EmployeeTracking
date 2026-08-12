@@ -9,6 +9,7 @@ import { NotificationBellComponent } from '../../components/notification-bell/no
 import { HasRoleDirective } from '../../directives/has-role.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
 
 interface NavItem {
   label: string;
@@ -21,7 +22,7 @@ interface NavItem {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationBellComponent, HasRoleDirective],
+  imports: [CommonModule, RouterModule, MatIconModule, NotificationBellComponent, HasRoleDirective],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss']
 })
@@ -31,23 +32,28 @@ export class ShellComponent {
   readonly loading = inject(LoadingService);
   readonly router  = inject(Router);
   readonly dialog  = inject(MatDialog);
-
+  isCollapsed = signal(false);
   sidebarOpen = signal(true);
   userMenuOpen = signal(false);
   currentPath  = signal('');
   darkMode     = signal(localStorage.getItem('theme') === 'dark');
-
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard',    icon: 'grid_view',      route: '/dashboard' },
-    { label: 'Time Tracking', icon: 'schedule',      route: '/time-tracking',  roles: ['Employee', 'Manager'] },
-    { label: 'Timesheets',   icon: 'calendar_month', route: '/timesheets',     roles: ['Employee', 'Manager'] },
-    { label: 'PTO',          icon: 'beach_access',   route: '/pto',            roles: ['Employee', 'Manager'] },
-    { label: 'Approvals',    icon: 'task_alt',       route: '/approvals',      roles: ['Manager', 'Admin'] },
-    { label: 'Payroll',      icon: 'bar_chart',      route: '/payroll',        roles: ['Manager', 'Admin'] },
+    { label: 'Dashboard', icon: 'grid_view', route: '/dashboard' },
+    { label: 'Time Tracking', icon: 'schedule', route: '/time-tracking', roles: ['Employee', 'Manager'] },
+    { label: 'Timesheets', icon: 'calendar_month', route: '/timesheets', roles: ['Employee', 'Manager'] },
+    { label: 'PTO', icon: 'beach_access', route: '/pto', roles: ['Employee', 'Manager'] },
+    { label: 'Approvals', icon: 'task_alt', route: '/approvals', roles: ['Manager', 'Admin'] },
+    { label: 'Payroll', icon: 'bar_chart', route: '/payroll', roles: ['Manager', 'Admin'] },
     { label: 'Notifications', icon: 'notifications', route: '/notifications' },
-    { label: 'Admin',        icon: 'admin_panel_settings', route: '/admin',   roles: ['Admin'] },
   ];
 
+  readonly adminNavItems: NavItem[] = [
+    { label: 'Policies', icon: 'rule', route: '/admin/policies' },
+    { label: 'Shifts', icon: 'event_note', route: '/admin/shifts' },
+    { label: 'Holidays', icon: 'celebration', route: '/admin/holidays' },
+    { label: 'Overtime Rules', icon: 'bolt', route: '/admin/overtime-rules' },
+    { label: 'Pay Periods', icon: 'date_range', route: '/admin/pay-periods' },
+  ];
   constructor() {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
@@ -70,7 +76,7 @@ export class ShellComponent {
     return this.currentPath().startsWith(route);
   }
 
-  toggleSidebar(): void { this.sidebarOpen.update(v => !v); }
+  toggleSidebar(): void { this.sidebarOpen.update(v => !v); this.isCollapsed.update(v => !v); }
   toggleUserMenu(): void { this.userMenuOpen.update(v => !v); }
 
   toggleDarkMode(): void {

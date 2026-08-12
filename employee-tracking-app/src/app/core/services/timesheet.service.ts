@@ -5,6 +5,7 @@ import {
   Timesheet, CreateTimesheetRequest,
   ApproveTimesheetRequest, RejectTimesheetRequest
 } from '../models/timesheet.models';
+import { PayPeriod } from '../models/admin.models';
 
 @Injectable({ providedIn: 'root' })
 export class TimesheetService {
@@ -28,5 +29,8 @@ export class TimesheetService {
   }
   getPending(): Observable<Timesheet[]> {
     return this.http.get<Timesheet[]>(`${this.url}/pending`);
+  }
+  getPayPeriods(): Observable<PayPeriod[]> {
+    return this.http.get<PayPeriod[]>(`${this.url}/pay-periods`);
   }
 }

@@ -8,6 +8,13 @@
 
         public async Task InvokeAsync(HttpContext ctx)
         {
+            // Skip restrictive headers in development — they break CORS preflight
+            if (!ctx.Request.Path.StartsWithSegments("/api"))
+            {
+                ctx.Response.Headers.Append("X-Frame-Options", "DENY");
+                ctx.Response.Headers.Append("Content-Security-Policy",
+                    "default-src 'self'");
+            }
             ctx.Response.Headers.Append(
                 "X-Content-Type-Options", "nosniff");
             ctx.Response.Headers.Append(

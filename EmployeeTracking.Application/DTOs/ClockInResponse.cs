@@ -14,5 +14,4 @@
         /// <summary>Human-readable confirmation message.</summary>
         string Message
     );
-
 }

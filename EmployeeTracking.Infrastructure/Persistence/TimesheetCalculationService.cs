@@ -19,69 +19,103 @@ namespace EmployeeTracking.Infrastructure.Persistence
         }
 
         public async Task<(decimal regular, decimal overtime, decimal pto, decimal unpaid)>
-            CalculateTotalsAsync(
-                Guid employeeId,
-                PayPeriod period,
-                CancellationToken ct = default)
+      CalculateTotalsAsync(
+          Guid employeeId,
+          PayPeriod period,
+          CancellationToken ct = default)
         {
             var from = new DateTimeOffset(
                 period.StartDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
             var to = new DateTimeOffset(
                 period.EndDate.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
 
-            // Load all entries for the period
             var entries = await _uow.TimeEntries
                 .GetByEmployeeAndDateRangeAsync(employeeId, from, to, ct);
 
-            // Load employee for policy thresholds
             var employee = await _uow.Employees.GetByIdAsync(employeeId, ct);
-            var dailyThreshold = employee?.AttendancePolicy?
-                                      .DailyOvertimeThresholdHours ?? 8m;
-            var weeklyThreshold = employee?.AttendancePolicy?
-                                      .WeeklyOvertimeThresholdHours ?? 40m;
+            var dailyThreshold = employee?.AttendancePolicy?.DailyOvertimeThresholdHours ?? 8m;
+            var weeklyThreshold = employee?.AttendancePolicy?.WeeklyOvertimeThresholdHours ?? 40m;
 
-            // Build daily hours by pairing clock-ins with clock-outs
-            var dailyMap = new Dictionary<DateOnly, decimal>();
+            // Sort all entries by timestamp ascending
+            var sorted = entries.OrderBy(e => e.Timestamp).ToList();
 
-            var clockIns = entries
-                .Where(e => e.EntryType == TimeEntryType.ClockIn)
-                .OrderBy(e => e.Timestamp)
-                .ToList();
+            decimal totalWorked = 0m;
 
-            var clockOuts = entries
-                .Where(e => e.EntryType == TimeEntryType.ClockOut)
-                .OrderBy(e => e.Timestamp)
-                .ToList();
-
-            for (int i = 0; i < Math.Min(clockIns.Count, clockOuts.Count); i++)
+            // Pair each ClockIn with the next ClockOut after it
+            foreach (var clockIn in sorted.Where(e => e.EntryType == TimeEntryType.ClockIn))
             {
-                var date = DateOnly.FromDateTime(clockIns[i].Timestamp.LocalDateTime);
-                var worked = (decimal)(clockOuts[i].Timestamp - clockIns[i].Timestamp)
-                                  .TotalHours;
+                // Find the first ClockOut that comes after this ClockIn
+                var clockOut = sorted.FirstOrDefault(e =>
+                    e.EntryType == TimeEntryType.ClockOut &&
+                    e.Timestamp > clockIn.Timestamp &&
+                    // Make sure it isn't already paired with an earlier ClockIn
+                    !sorted.Any(ci =>
+                        ci.EntryType == TimeEntryType.ClockIn &&
+                        ci.Timestamp > clockIn.Timestamp &&
+                        ci.Timestamp < e.Timestamp));
 
-                // Deduct unpaid break time
-                var unpaidBreaks = entries
-                    .Where(e => e.EntryType == TimeEntryType.BreakStart
-                             && DateOnly.FromDateTime(e.Timestamp.LocalDateTime) == date)
-                    .Sum(b =>
+                if (clockOut == null) continue; // open punch — skip
+
+                var workedHours = (decimal)(clockOut.Timestamp - clockIn.Timestamp).TotalHours;
+
+                // Deduct unpaid break time between this clock-in and clock-out
+                var breakStarts = sorted.Where(e =>
+                    e.EntryType == TimeEntryType.BreakStart &&
+                    e.Timestamp > clockIn.Timestamp &&
+                    e.Timestamp < clockOut.Timestamp).ToList();
+
+                foreach (var breakStart in breakStarts)
+                {
+                    var breakEnd = sorted.FirstOrDefault(e =>
+                        e.EntryType == TimeEntryType.BreakEnd &&
+                        e.Timestamp > breakStart.Timestamp &&
+                        e.Timestamp < clockOut.Timestamp);
+
+                    if (breakEnd != null)
                     {
-                        var breakEnd = entries.FirstOrDefault(
-                            e => e.EntryType == TimeEntryType.BreakEnd
-                              && e.Timestamp > b.Timestamp);
-                        return breakEnd is null
-                            ? 0m
-                            : (decimal)(breakEnd.Timestamp - b.Timestamp).TotalHours;
-                    });
+                        var breakHours = (decimal)(breakEnd.Timestamp - breakStart.Timestamp).TotalHours;
+                        workedHours -= breakHours;
+                    }
+                }
 
-                if (dailyMap.ContainsKey(date))
-                    dailyMap[date] += worked - unpaidBreaks;
-                else
-                    dailyMap[date] = worked - unpaidBreaks;
+                totalWorked += Math.Max(0m, workedHours);
             }
 
-            var dailyHours = dailyMap
+            // Group by day for overtime calculation
+            var dailyHours = entries
+                .Where(e => e.EntryType == TimeEntryType.ClockIn)
+                .GroupBy(e => DateOnly.FromDateTime(e.Timestamp.LocalDateTime))
+                .ToDictionary(g => g.Key, g => 0m);
+
+            // Calculate per-day totals using the same pairing logic
+            foreach (var clockIn in sorted.Where(e => e.EntryType == TimeEntryType.ClockIn))
+            {
+                var clockOut = sorted.FirstOrDefault(e =>
+                    e.EntryType == TimeEntryType.ClockOut &&
+                    e.Timestamp > clockIn.Timestamp &&
+                    !sorted.Any(ci =>
+                        ci.EntryType == TimeEntryType.ClockIn &&
+                        ci.Timestamp > clockIn.Timestamp &&
+                        ci.Timestamp < e.Timestamp));
+
+                if (clockOut == null) continue;
+
+                var day = DateOnly.FromDateTime(clockIn.Timestamp.LocalDateTime);
+                var worked = (decimal)(clockOut.Timestamp - clockIn.Timestamp).TotalHours;
+
+                if (dailyHours.ContainsKey(day))
+                    dailyHours[day] += worked;
+                else
+                    dailyHours[day] = worked;
+            }
+
+            // Apply overtime strategy
+            var dailyHoursList = dailyHours
                 .Select(d => new DailyHoursDto(d.Key, Math.Max(0m, d.Value)))
                 .ToList();
+
+            var (regular, overtime) = _overtimeStrategy.Calculate(
+                dailyHoursList, dailyThreshold, weeklyThreshold);
 
             // Load PTO hours for the period
             var ptoRequests = await _uow.PTORequests.GetByEmployeeAsync(employeeId, ct);
@@ -91,17 +125,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
                          && p.EndDate <= period.EndDate)
                 .Sum(p => p.HoursRequested);
 
-            // Detect missing punches (clock-in with no matching clock-out)
-            var unpaidHours = 0m;
-            var exceptions = clockIns.Count > clockOuts.Count
-                ? "Missing clock-out detected."
-                : null;
-
-            // Run overtime calculation
-            var (regular, overtime) = _overtimeStrategy.Calculate(
-                dailyHours, dailyThreshold, weeklyThreshold);
-
-            return (regular, overtime, ptoHours, unpaidHours);
+            return (regular, overtime, ptoHours, 0m);
         }
     }
 }

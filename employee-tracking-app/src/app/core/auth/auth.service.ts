@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -16,15 +16,45 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly base   = `${environment.apiUrl}/auth`;
 
+  configureHeaders() {
+    let headers = new HttpHeaders();
+    headers = headers.set('Content-Type', 'application/json');
+    return headers;
+  }
+  // login(req: LoginRequest): Observable<AuthResponse> {
+  //   this.store.setLoading(true);
+  //   return this.http.post<AuthResponse>(`${this.base}/login`, req, { headers: this.configureHeaders() }).pipe(
+  //     tap({
+  //       next: (res) => {
+  //         this.store.setTokens(res.accessToken, res.refreshToken);
+  //         this.store.setLoading(false);
+  //       },
+  //       error: () => this.store.setLoading(false)
+  //     })
+  //   );
+  // }
   login(req: LoginRequest): Observable<AuthResponse> {
     this.store.setLoading(true);
     return this.http.post<AuthResponse>(`${this.base}/login`, req).pipe(
       tap({
-        next: (res) => {
+        next: res => {
           this.store.setTokens(res.accessToken, res.refreshToken);
           this.store.setLoading(false);
+
+          // Read role directly from the response, not from the store
+          // (store may not have updated yet when this runs)
+          const isAdmin = res.roles.includes('Admin');
+          const isManager = res.roles.includes('Manager');
+
+          if (isAdmin) {
+            this.router.navigate(['/admin']);
+          } else if (isManager) {
+            this.router.navigate(['/approvals']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         },
-        error: () => this.store.setLoading(false)
+        error: err => this.store.setError(err.error?.detail ?? 'Login failed')
       })
     );
   }
