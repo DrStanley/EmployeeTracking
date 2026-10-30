@@ -2,7 +2,8 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthStore } from '../../core/auth/auth.store';
 import { PTOService } from '../../core/services/pto.service';
 import { TimesheetService } from '../../core/services/timesheet.service';
@@ -12,6 +13,8 @@ import { Timesheet } from '../../core/models/timesheet.models';
 import { Notification } from '../../core/models/notification.models';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
+import { ActivityService } from '../../core/services/activity.service';
+import { AppUsageItem, activityRange, formatHours } from '../../core/models/activity.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,11 +28,14 @@ export class DashboardComponent implements OnInit {
   private readonly ptoService = inject(PTOService);
   private readonly timesheetService = inject(TimesheetService);
   private readonly notificationService = inject(NotificationService);
+  private readonly activityService = inject(ActivityService);
+  readonly formatHours = formatHours;
 
   loading = signal(true);
   ptoBalance = signal<PTOBalance | null>(null);
   pendingApprovals = signal<Timesheet[]>([]);
   recentNotifications = signal<Notification[]>([]);
+  weekApps = signal<AppUsageItem[]>([]);
 
   today = new Date();
 
@@ -44,7 +50,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const calls: any = {
-      notifications: this.notificationService.getAll(true)
+      notifications: this.notificationService.getAll(true),
+      activity: this.activityService.getReport(activityRange('week')).pipe(
+        catchError(() => of(null))
+      )
     };
 
     if (this.store.isEmployee() || this.store.isManager()) {
@@ -59,6 +68,7 @@ export class DashboardComponent implements OnInit {
         if (res.balance) this.ptoBalance.set(res.balance);
         if (res.pending) this.pendingApprovals.set(res.pending);
         this.recentNotifications.set((res.notifications ?? []).slice(0, 5));
+        this.weekApps.set((res.activity?.apps ?? []).slice(0, 4));
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

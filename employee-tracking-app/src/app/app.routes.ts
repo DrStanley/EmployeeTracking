@@ -22,6 +22,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'activity',
+        loadComponent: () => import('./features/activity/activity.component').then(m => m.ActivityComponent)
+      },
+      {
         path: 'time-tracking',
         loadComponent: () => import('./features/time-tracking/time-tracking.component').then(m => m.TimeTrackingComponent),
         canActivate: [roleGuard(['Employee', 'Manager'])]

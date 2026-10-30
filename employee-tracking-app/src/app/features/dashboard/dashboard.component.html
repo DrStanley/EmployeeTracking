@@ -83,9 +83,31 @@
       </div>
     </div>
 
+    <div class="card apps-card">
+      <div class="flex justify-between items-center" style="margin-bottom: 16px;">
+        <h3>Apps this week</h3>
+        <a routerLink="/activity" class="text-sm">View activity</a>
+      </div>
+      @if (weekApps().length === 0) {
+        <p class="text-muted text-sm">App usage shows up as you work in EmpTrack, or when you log time on the Activity page.</p>
+      } @else {
+        <div class="week-apps">
+          @for (app of weekApps(); track app.appName) {
+            <div class="week-app">
+              <span>{{ app.appName }}</span>
+              <strong>{{ formatHours(app.hours) }}</strong>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
     <div class="quick-actions">
       <h3 style="margin-bottom: 12px;">Quick Actions</h3>
       <div class="flex gap-3">
+        <a routerLink="/activity" class="btn btn-secondary">
+          <mat-icon>apps</mat-icon> View activity
+        </a>
         <a routerLink="/time-tracking" class="btn btn-primary" *hasRole="['Employee','Manager']">
           <mat-icon>schedule</mat-icon> Clock In
         </a>

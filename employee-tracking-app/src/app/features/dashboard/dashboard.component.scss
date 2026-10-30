@@ -111,6 +111,28 @@
   flex-shrink: 0;
 }
 
+.apps-card { margin-bottom: 24px; }
+
+.week-apps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.week-app {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
 .quick-actions {
   margin-top: 8px;
 }

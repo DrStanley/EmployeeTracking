@@ -29,6 +29,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Holiday> Holidays => Set<Holiday>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<AppUsageSession> AppUsageSessions => Set<AppUsageSession>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

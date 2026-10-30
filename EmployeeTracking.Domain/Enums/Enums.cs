@@ -38,4 +38,9 @@
         FullTime, PartTime, Contract, Casual
     }
 
+    public enum AppUsageSource
+    {
+        System, Manual
+    }
+
 }

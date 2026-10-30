@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -10,6 +10,7 @@ import { HasRoleDirective } from '../../directives/has-role.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
+import { ActivityTrackerService } from '../../../core/services/activity-tracker.service';
 
 interface NavItem {
   label: string;
@@ -26,12 +27,13 @@ interface NavItem {
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss']
 })
-export class ShellComponent {
+export class ShellComponent implements OnDestroy {
   readonly store   = inject(AuthStore);
   readonly auth    = inject(AuthService);
   readonly loading = inject(LoadingService);
   readonly router  = inject(Router);
   readonly dialog  = inject(MatDialog);
+  private readonly activityTracker = inject(ActivityTrackerService);
   isCollapsed = signal(false);
   sidebarOpen = signal(true);
   userMenuOpen = signal(false);
@@ -39,6 +41,7 @@ export class ShellComponent {
   darkMode     = signal(localStorage.getItem('theme') === 'dark');
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'grid_view', route: '/dashboard' },
+    { label: 'Activity', icon: 'apps', route: '/activity' },
     { label: 'Time Tracking', icon: 'schedule', route: '/time-tracking', roles: ['Employee', 'Manager'] },
     { label: 'Timesheets', icon: 'calendar_month', route: '/timesheets', roles: ['Employee', 'Manager'] },
     { label: 'PTO', icon: 'beach_access', route: '/pto', roles: ['Employee', 'Manager'] },
@@ -55,12 +58,18 @@ export class ShellComponent {
     { label: 'Pay Periods', icon: 'date_range', route: '/admin/pay-periods' },
   ];
   constructor() {
+    this.currentPath.set(this.router.url);
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe((e: NavigationEnd) => {
       this.currentPath.set(e.urlAfterRedirects);
     });
     this.applyTheme();
+    this.activityTracker.start();
+  }
+
+  ngOnDestroy(): void {
+    this.activityTracker.stop();
   }
 
   visibleNavItems(): NavItem[] {

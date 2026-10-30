@@ -328,15 +328,24 @@ using (var scope = app.Services.CreateScope())
         }
         await db.SaveChangesAsync();
     }
-         IResend _resend = scope.ServiceProvider.GetRequiredService<IResend>(); ;
-    var email = new Resend.EmailMessage
+    try
     {
-        From = "noreplyonboarding@resend.dev",
-        Subject = "HTML Test",
-        HtmlBody = "<p>Hi <strong>{employeeName}</strong>,</p>\r\n<p>Your employee account has been created. Here are your details:</p>\r\n<div class=\"info-box\">\r\n  <strong>Email:</strong>    {email}<br/>\r\n</div>\r\n<p><strong>Please change your password immediately after your first login.</strong></p>\r\n\"\"\"",
-        To = "listanley50@gmail.com"
-    };
-    var response = await _resend.EmailSendAsync(email, CancellationToken.None);
+        IResend resend = scope.ServiceProvider.GetRequiredService<IResend>();
+        var email = new Resend.EmailMessage
+        {
+            From = "noreplyonboarding@resend.dev",
+            Subject = "HTML Test",
+            HtmlBody = "<p>Hi <strong>{employeeName}</strong>,</p>\r\n<p>Your employee account has been created. Here are your details:</p>\r\n<div class=\"info-box\">\r\n  <strong>Email:</strong>    {email}<br/>\r\n</div>\r\n<p><strong>Please change your password immediately after your first login.</strong></p>\r\n\"\"\"",
+            To = "listanley50@gmail.com"
+        };
+        await resend.EmailSendAsync(email, CancellationToken.None);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Startup");
+        logger.LogWarning(ex, "Startup test email was not sent.");
+    }
 
 }
 app.Run();

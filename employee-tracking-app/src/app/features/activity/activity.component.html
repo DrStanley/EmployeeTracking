@@ -1,0 +1,192 @@
+<div class="page-content">
+  <div class="page-head">
+    <h1>Activity</h1>
+    <p class="text-secondary">Apps used and hours spent. Time in EmpTrack is recorded while you work. You can also log time in other apps.</p>
+  </div>
+
+  <div class="card toolbar">
+    <div class="range-pills" role="tablist" aria-label="Activity range">
+      @for (preset of presets; track preset.id) {
+        <button
+          type="button"
+          class="pill"
+          [class.active]="range() === preset.id"
+          (click)="setRange(preset.id)">
+          {{ preset.label }}
+        </button>
+      }
+    </div>
+
+    @if (canViewOthers()) {
+      <label class="employee-filter">
+        <span class="text-sm font-semibold">Employee</span>
+        <select class="field" [value]="selectedEmployeeId() ?? ''" (change)="onEmployeeChange($event)">
+          <option value="">My activity</option>
+          @for (user of users(); track user.employeeId) {
+            <option [value]="user.employeeId">{{ user.employeeName }}</option>
+          }
+        </select>
+      </label>
+    }
+  </div>
+
+  @if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  }
+
+  @if (canViewOthers() && users().length > 0) {
+    <div class="card people-card">
+      <h3>People</h3>
+      <p class="text-muted text-sm people-hint">
+        {{ store.isAdmin() ? 'Active employees' : 'Your direct reports' }} for this range.
+      </p>
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Top app</th>
+            <th>Apps</th>
+            <th>Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.employeeId) {
+            <tr
+              class="clickable"
+              [class.selected]="isSelected(user.employeeId)"
+              (click)="selectUser(user.employeeId)">
+              <td>
+                <span class="person-name">{{ user.employeeName }}</span>
+                <span class="text-muted text-xs person-title">{{ user.jobTitle }}</span>
+              </td>
+              <td>{{ user.topApp ? user.topApp + ' · ' + formatHours(user.topAppHours) : '—' }}</td>
+              <td>{{ user.appCount }}</td>
+              <td class="hours-cell">{{ formatHours(user.totalHours) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (report()) {
+    <div class="grid-cols-4 stat-row">
+      <div class="card stat-card">
+        <div class="stat-icon blue"><mat-icon>schedule</mat-icon></div>
+        <p class="stat-label">Hours</p>
+        <p class="stat-value">{{ formatHours(report()!.totalHours) }}</p>
+        <p class="text-muted text-sm">{{ report()!.employeeName }}</p>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon violet"><mat-icon>apps</mat-icon></div>
+        <p class="stat-label">Apps used</p>
+        <p class="stat-value">{{ report()!.appCount }}</p>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon green"><mat-icon>timeline</mat-icon></div>
+        <p class="stat-label">Sessions</p>
+        <p class="stat-value">{{ report()!.sessionCount }}</p>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon amber"><mat-icon>star</mat-icon></div>
+        <p class="stat-label">Most used</p>
+        @if (report()!.apps[0]; as topApp) {
+          <p class="stat-value most-used">{{ topApp.appName }}</p>
+          <p class="text-muted text-sm">{{ formatHours(topApp.hours) }}</p>
+        } @else {
+          <p class="stat-value most-used">—</p>
+        }
+      </div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="card">
+        <h3>Apps</h3>
+        @if (report()!.apps.length === 0) {
+          <app-empty-state
+            icon="apps"
+            title="No app time yet"
+            message="Use EmpTrack with this tab visible, or log hours for another app below.">
+          </app-empty-state>
+        } @else {
+          <div class="app-list">
+            @for (app of report()!.apps; track app.appName) {
+              <div class="app-row">
+                <div class="app-meta">
+                  <span class="app-name">{{ app.appName }}</span>
+                  <span class="text-muted text-xs">{{ app.sessionCount }} session{{ app.sessionCount === 1 ? '' : 's' }}</span>
+                </div>
+                <div class="app-bar-track" aria-hidden="true">
+                  <div class="app-bar-fill" [style.width.%]="app.percent"></div>
+                </div>
+                <div class="app-hours">
+                  <span>{{ formatHours(app.hours) }}</span>
+                  <span class="text-muted text-xs">{{ app.percent }}%</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="card">
+        <h3>Sessions</h3>
+        @if (report()!.sessions.length === 0) {
+          <p class="text-muted text-sm empty-copy">Sessions show up here after time is recorded.</p>
+        } @else {
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>App</th>
+                <th>When</th>
+                <th>Hours</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (session of report()!.sessions; track session.id) {
+                <tr>
+                  <td>{{ session.appName }}</td>
+                  <td>{{ session.startedAt | date:'MMM d, h:mm a' }}</td>
+                  <td>{{ formatHours(session.hours) }}</td>
+                  <td>
+                    <span class="badge" [class.badge-blue]="session.source === 'System'" [class.badge-gray]="session.source !== 'System'">
+                      {{ session.source === 'System' ? 'In app' : 'Logged' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+
+    @if (viewingSelf()) {
+      <div class="card log-card">
+        <h3>Log app time</h3>
+        <p class="text-muted text-sm">Record hours spent in an app outside EmpTrack, such as Excel or Slack.</p>
+        <form class="log-form" (submit)="logTime($event)">
+          <label>
+            <span class="text-sm font-semibold">App</span>
+            <input class="field" name="appName" maxlength="100" placeholder="Excel" [(ngModel)]="logAppName" required />
+          </label>
+          <label>
+            <span class="text-sm font-semibold">Date</span>
+            <input class="field" type="date" name="logDate" [(ngModel)]="logDate" required />
+          </label>
+          <label>
+            <span class="text-sm font-semibold">Hours</span>
+            <input class="field hours-input" type="number" name="logHours" min="0.25" max="24" step="0.25" [(ngModel)]="logHours" required />
+          </label>
+          <button class="btn btn-primary" type="submit" [disabled]="saving()">
+            <mat-icon>add</mat-icon>
+            {{ saving() ? 'Saving…' : 'Log time' }}
+          </button>
+        </form>
+      </div>
+    }
+  }
+</div>
