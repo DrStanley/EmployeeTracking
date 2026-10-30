@@ -32,6 +32,14 @@ export class CalendarComponent implements OnInit {
     this.load();
   }
 
+  isToday(date: Date | null): boolean {
+    if (!date) return false;
+    const now = new Date();
+    return date.getFullYear() === now.getFullYear()
+      && date.getMonth() === now.getMonth()
+      && date.getDate() === now.getDate();
+  }
+
   title(): string {
     return this.cursor().toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   }

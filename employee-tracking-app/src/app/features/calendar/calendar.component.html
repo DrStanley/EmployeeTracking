@@ -28,7 +28,7 @@
       </div>
       <div class="grid">
         @for (cell of cells(); track cell.key) {
-          <div class="cell" [class.empty]="!cell.date">
+          <div class="cell" [class.empty]="!cell.date" [class.today]="isToday(cell.date)">
             @if (cell.date) {
               <span class="num">{{ cell.date.getDate() }}</span>
               @for (holiday of cell.holidays; track holiday.name) {

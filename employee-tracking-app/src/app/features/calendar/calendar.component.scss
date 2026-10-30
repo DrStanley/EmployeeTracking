@@ -2,6 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 24px;
   p { margin-top: 6px; }
@@ -25,6 +26,7 @@
   flex-direction: column;
   gap: 4px;
   &.empty { border-color: transparent; }
+  &.today { border-color: var(--color-primary); background: var(--color-primary-muted); }
 }
 .num { font-size: 12px; font-weight: 700; }
 .chip {

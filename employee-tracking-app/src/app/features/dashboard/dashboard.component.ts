@@ -92,6 +92,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  barHeight(day: string): number {
+    const hours = this.weeklyHours()[day] || 0;
+    const max = Math.max(...Object.values(this.weeklyHours()), 0);
+    if (hours <= 0 || max <= 0) return 4;
+    return Math.max(8, Math.round((hours / max) * 140));
+  }
+
   weekTotal(): number {
     const w = this.weeklyHours();
     return Object.values(w).reduce((a, b) => a + b, 0);

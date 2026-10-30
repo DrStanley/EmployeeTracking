@@ -37,6 +37,7 @@ export class ShellComponent implements OnDestroy {
   isCollapsed = signal(false);
   sidebarOpen = signal(true);
   userMenuOpen = signal(false);
+  mobileMoreOpen = signal(false);
   currentPath  = signal('');
   darkMode     = signal(localStorage.getItem('theme') === 'dark');
   readonly navItems: NavItem[] = [
@@ -45,7 +46,7 @@ export class ShellComponent implements OnDestroy {
     { label: 'Time Tracking', icon: 'schedule', route: '/time-tracking', roles: ['Employee', 'Manager'] },
     { label: 'Schedule', icon: 'event_note', route: '/schedule', roles: ['Employee', 'Manager'] },
     { label: 'Calendar', icon: 'calendar_month', route: '/calendar' },
-    { label: 'Timesheets', icon: 'calendar_month', route: '/timesheets', roles: ['Employee', 'Manager'] },
+    { label: 'Timesheets', icon: 'fact_check', route: '/timesheets', roles: ['Employee', 'Manager'] },
     { label: 'PTO', icon: 'beach_access', route: '/pto', roles: ['Employee', 'Manager'] },
     { label: 'Approvals', icon: 'task_alt', route: '/approvals', roles: ['Manager', 'Admin'] },
     { label: 'Payroll', icon: 'bar_chart', route: '/payroll', roles: ['Manager', 'Admin'] },
@@ -54,7 +55,7 @@ export class ShellComponent implements OnDestroy {
 
   readonly adminNavItems: NavItem[] = [
     { label: 'Policies', icon: 'rule', route: '/admin/policies' },
-    { label: 'Shifts', icon: 'event_note', route: '/admin/shifts' },
+    { label: 'Shifts', icon: 'work_history', route: '/admin/shifts' },
     { label: 'Holidays', icon: 'celebration', route: '/admin/holidays' },
     { label: 'Overtime Rules', icon: 'bolt', route: '/admin/overtime-rules' },
     { label: 'Pay Periods', icon: 'date_range', route: '/admin/pay-periods' },
@@ -66,6 +67,7 @@ export class ShellComponent implements OnDestroy {
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe((e: NavigationEnd) => {
       this.currentPath.set(e.urlAfterRedirects);
+      this.mobileMoreOpen.set(false);
     });
     this.applyTheme();
     this.activityTracker.start();
@@ -88,8 +90,37 @@ export class ShellComponent implements OnDestroy {
     return this.currentPath().startsWith(route);
   }
 
+  pageTitle(): string {
+    const path = this.currentPath().split('?')[0];
+    const items = [
+      ...this.navItems,
+      ...this.adminNavItems,
+      { label: 'Profile', icon: 'person', route: '/profile' }
+    ];
+    const match = items
+      .filter(item => path === item.route || path.startsWith(item.route + '/'))
+      .sort((a, b) => b.route.length - a.route.length)[0];
+    if (match) return match.label;
+    const segment = path.split('/').filter(Boolean).pop() ?? 'Home';
+    return segment.replace(/-/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+  }
+
+  mobilePrimary(): NavItem[] {
+    return this.visibleNavItems().slice(0, 4);
+  }
+
+  overflowNavItems(): NavItem[] {
+    const extra = this.visibleNavItems().slice(4);
+    return this.store.isAdmin() ? [...extra, ...this.adminNavItems] : extra;
+  }
+
+  overflowActive(): boolean {
+    return this.overflowNavItems().some(item => this.isActive(item.route));
+  }
+
   toggleSidebar(): void { this.sidebarOpen.update(v => !v); this.isCollapsed.update(v => !v); }
   toggleUserMenu(): void { this.userMenuOpen.update(v => !v); }
+  toggleMobileMore(): void { this.mobileMoreOpen.update(open => !open); }
 
   toggleDarkMode(): void {
     const dark = !this.darkMode();

@@ -146,3 +146,9 @@
 .quick-actions {
   margin-top: 8px;
 }
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

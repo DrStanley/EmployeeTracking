@@ -27,7 +27,7 @@
         <p class="stat-label">Shift</p>
         <p class="stat-value detail">{{ profile()!.shiftName || 'None assigned' }}</p>
         @if (profile()!.shiftStart) {
-          <p class="text-muted text-sm">{{ profile()!.shiftStart }}–{{ profile()!.shiftEnd }}</p>
+          <p class="text-muted text-sm">{{ profile()!.shiftStart?.slice(0, 5) }}–{{ profile()!.shiftEnd?.slice(0, 5) }}</p>
         }
       </div>
       <div class="card stat-card">

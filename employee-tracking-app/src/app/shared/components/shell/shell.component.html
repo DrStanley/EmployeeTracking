@@ -88,7 +88,7 @@
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <span class="material-icons home-icon">home</span>
           <span class="separator">/</span>
-          <span class="current">{{ currentPath() | titlecase }}</span>
+          <span class="current">{{ pageTitle() }}</span>
         </nav>
       </div>
 
@@ -120,12 +120,32 @@
   </div>
 
   <!-- Mobile Bottom Nav -->
+  @if (mobileMoreOpen()) {
+  <div class="mobile-more">
+    @for (item of overflowNavItems(); track item.route) {
+    <a class="mobile-more-item" [routerLink]="item.route" [class.active]="isActive(item.route)"
+      (click)="mobileMoreOpen.set(false)">
+      <span class="material-icons">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+    </a>
+    }
+  </div>
+  }
+
   <nav class="mobile-nav" aria-label="Mobile navigation">
-    @for (item of visibleNavItems().slice(0, 5); track item.route) {
-    <a class="mobile-nav-item" [routerLink]="item.route" [class.active]="isActive(item.route)">
+    @for (item of mobilePrimary(); track item.route) {
+    <a class="mobile-nav-item" [routerLink]="item.route" [class.active]="isActive(item.route)"
+      (click)="mobileMoreOpen.set(false)">
       <span class="material-icons">{{ item.icon }}</span>
       <span class="mobile-label">{{ item.label }}</span>
     </a>
+    }
+    @if (overflowNavItems().length) {
+    <button type="button" class="mobile-nav-item" [class.active]="overflowActive() || mobileMoreOpen()"
+      (click)="toggleMobileMore()" [attr.aria-expanded]="mobileMoreOpen()">
+      <span class="material-icons">{{ mobileMoreOpen() ? 'close' : 'more_horiz' }}</span>
+      <span class="mobile-label">More</span>
+    </button>
     }
   </nav>
 
