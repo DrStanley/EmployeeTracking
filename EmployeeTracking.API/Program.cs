@@ -294,60 +294,45 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // Seed default department and attendance policy to be removed in production
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    if (!db.Departments.Any())
+if (app.Environment.IsDevelopment()){
+    using (var scope = app.Services.CreateScope())
     {
-        db.Departments.Add(Department.Create("General", "Default department"));
-        await db.SaveChangesAsync();
-    }
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    if (!db.AttendancePolicies.Any())
-    {
-        db.AttendancePolicies.Add(AttendancePolicy.CreateDefault("Standard Policy"));
-        await db.SaveChangesAsync();
-    }
-    if (!db.PayPeriods.Any())
-    {
-        var now = DateOnly.FromDateTime(DateTime.Now);
-        var start = new DateOnly(now.Year, now.Month, 1);
-        var end = start.AddMonths(1).AddDays(-1);
-
-        db.PayPeriods.Add(PayPeriod.Create(
-            $"{start:MMMM yyyy}", start, end));
-
-        await db.SaveChangesAsync();
-    }
-    if (!db.PTOBalances.Any())
-    {
-        var employees = db.Employees.ToList();
-        foreach (var emp in employees)
+        if (!db.Departments.Any())
         {
-            var balance = PTOBalance.CreateForYear(emp.Id, DateTime.Now.Year);
-            balance.Accrue(80m); // seed with 80 hours (2 weeks)
-            db.PTOBalances.Add(balance);
+            db.Departments.Add(Department.Create("General", "Default department"));
+            await db.SaveChangesAsync();
         }
-        await db.SaveChangesAsync();
-    }
-    try
-    {
-        IResend resend = scope.ServiceProvider.GetRequiredService<IResend>();
-        var email = new Resend.EmailMessage
+
+        if (!db.AttendancePolicies.Any())
         {
-            From = "noreplyonboarding@resend.dev",
-            Subject = "HTML Test",
-            HtmlBody = "<p>Hi <strong>{employeeName}</strong>,</p>\r\n<p>Your employee account has been created. Here are your details:</p>\r\n<div class=\"info-box\">\r\n  <strong>Email:</strong>    {email}<br/>\r\n</div>\r\n<p><strong>Please change your password immediately after your first login.</strong></p>\r\n\"\"\"",
-            To = "listanley50@gmail.com"
-        };
-        await resend.EmailSendAsync(email, CancellationToken.None);
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
-            .CreateLogger("Startup");
-        logger.LogWarning(ex, "Startup test email was not sent.");
+            db.AttendancePolicies.Add(AttendancePolicy.CreateDefault("Standard Policy"));
+            await db.SaveChangesAsync();
+        }
+        if (!db.PayPeriods.Any())
+        {
+            var now = DateOnly.FromDateTime(DateTime.Now);
+            var start = new DateOnly(now.Year, now.Month, 1);
+            var end = start.AddMonths(1).AddDays(-1);
+
+            db.PayPeriods.Add(PayPeriod.Create(
+                $"{start:MMMM yyyy}", start, end));
+
+            await db.SaveChangesAsync();
+        }
+        if (!db.PTOBalances.Any())
+        {
+            var employees = db.Employees.ToList();
+            foreach (var emp in employees)
+            {
+                var balance = PTOBalance.CreateForYear(emp.Id, DateTime.Now.Year);
+                balance.Accrue(80m); // seed with 80 hours (2 weeks)
+                db.PTOBalances.Add(balance);
+            }
+            await db.SaveChangesAsync();
+        }
+
     }
 
 }

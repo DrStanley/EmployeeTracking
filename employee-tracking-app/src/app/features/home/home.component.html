@@ -1,0 +1,97 @@
+<div class="home">
+  <header class="top">
+    <a class="brand" routerLink="/">
+      <span class="brand-icon"><mat-icon>schedule</mat-icon></span>
+      <span>
+        <strong>EmpTrack</strong>
+        <small>Time tracking</small>
+      </span>
+    </a>
+    <nav class="top-nav">
+      <a href="#features">Features</a>
+      <a routerLink="/login">Sign in</a>
+      <a routerLink="/register" class="btn btn-primary btn-sm">Create account</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">For employees, managers, and admins</p>
+      <h1>Hours, time off, and who is working. In one place.</h1>
+      <p class="lead">
+        Clock in, follow your shift, request PTO, and line app time up with the hours you worked.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/login" class="btn btn-primary btn-lg">Sign in</a>
+        <a routerLink="/register" class="btn btn-secondary btn-lg">Create account</a>
+      </div>
+    </div>
+
+    <div class="preview" aria-hidden="true">
+      <div class="preview-bar">
+        <span></span><span></span><span></span>
+        <em>Dashboard</em>
+      </div>
+      <div class="preview-stats">
+        <div>
+          <span>Today</span>
+          <strong>Clocked in</strong>
+        </div>
+        <div>
+          <span>This week</span>
+          <strong>32h</strong>
+        </div>
+        <div>
+          <span>PTO</span>
+          <strong>16h</strong>
+        </div>
+      </div>
+      <div class="preview-list">
+        <p>Who is working</p>
+        <div><span>Alex Morgan</span><b class="on">Working</b></div>
+        <div><span>Priya Shah</span><b class="break">On break</b></div>
+        <div><span>Jordan Lee</span><b>Out</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <h2>What you can do</h2>
+    <div class="feature-grid">
+      @for (feature of features; track feature.title) {
+        <article>
+          <span class="feature-icon"><mat-icon>{{ feature.icon }}</mat-icon></span>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="roles">
+    <h2>Who it’s for</h2>
+    <div class="role-grid">
+      @for (role of roles; track role.title) {
+        <article>
+          <div class="role-head">
+            <span class="feature-icon"><mat-icon>{{ role.icon }}</mat-icon></span>
+            <h3>{{ role.title }}</h3>
+          </div>
+          <ul>
+            @for (item of role.items; track item) {
+              <li>
+                <mat-icon>check</mat-icon>
+                <span>{{ item }}</span>
+              </li>
+            }
+          </ul>
+        </article>
+      }
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>EmpTrack</span>
+    <a routerLink="/login">Sign in</a>
+  </footer>
+</div>
