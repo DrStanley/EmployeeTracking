@@ -5,11 +5,12 @@ import {
   AttendancePolicy, OvertimeRule, Shift, Holiday,
   PayPeriod, PTOAccrualSettings
 } from '../models/admin.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly http = inject(HttpClient);
-  private readonly base = '/admin';
+  private readonly base = `${environment.apiUrl}/admin`;
 
   // Policies
   getPolicies(): Observable<AttendancePolicy[]>     { return this.http.get<AttendancePolicy[]>(`${this.base}/policies`); }

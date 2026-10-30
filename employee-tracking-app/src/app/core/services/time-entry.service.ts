@@ -3,11 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ClockInRequest, ClockInResponse, ClockOutResponse, TimeEntry } from '../models/time-entry.models';
 import { Presence, WeeklyHours, WorkedHours } from '../models/workspace.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TimeEntryService {
   private readonly http = inject(HttpClient);
-  private readonly url = '/TimeEntry';
+  private readonly url = `${environment.apiUrl}/TimeEntry`;
 
   clockIn(req: ClockInRequest): Observable<ClockInResponse> {
     return this.http.post<ClockInResponse>(`${this.url}/clock-in`, req);

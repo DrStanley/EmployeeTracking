@@ -5,11 +5,12 @@ import {
   PTORequest, PTOBalance,
   SubmitPTORequest, ApprovePTORequest, RejectPTORequest
 } from '../models/pto.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PTOService {
   private readonly http = inject(HttpClient);
-  private readonly url  = '/pto';
+  private readonly url  = `${environment.apiUrl}/pto`;
 
   submit(req: SubmitPTORequest): Observable<PTORequest> {
     return this.http.post<PTORequest>(this.url, req);

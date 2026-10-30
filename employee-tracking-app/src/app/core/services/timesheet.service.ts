@@ -6,11 +6,12 @@ import {
   ApproveTimesheetRequest, RejectTimesheetRequest
 } from '../models/timesheet.models';
 import { PayPeriod } from '../models/admin.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TimesheetService {
   private readonly http = inject(HttpClient);
-  private readonly url  = '/timesheets';
+  private readonly url  = `${environment.apiUrl}/timesheets`;
 
   create(req: CreateTimesheetRequest): Observable<Timesheet> {
     return this.http.post<Timesheet>(this.url, req);

@@ -7,11 +7,12 @@ import {
   RecordAppUsageResult,
   UserActivitySummary
 } from '../models/activity.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {
   private readonly http = inject(HttpClient);
-  private readonly url = '/activity';
+  private readonly url = `${environment.apiUrl}/activity`;
 
   getReport(
     range: { from: string; to: string },

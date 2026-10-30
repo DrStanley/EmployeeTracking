@@ -4,25 +4,26 @@ import { Observable } from 'rxjs';
 import {
   AuditLogEntry, CalendarMonth, EmployeeProfile, Schedule
 } from '../models/workspace.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
   private readonly http = inject(HttpClient);
 
   profile(): Observable<EmployeeProfile> {
-    return this.http.get<EmployeeProfile>('/employees/me');
+    return this.http.get<EmployeeProfile>(`${environment.apiUrl}/employees/me`);
   }
 
   schedule(): Observable<Schedule> {
-    return this.http.get<Schedule>('/employees/schedule');
+    return this.http.get<Schedule>(`${environment.apiUrl}/employees/schedule`);
   }
 
   calendar(year: number, month: number): Observable<CalendarMonth> {
     const params = new HttpParams().set('year', year).set('month', month);
-    return this.http.get<CalendarMonth>('/pto/calendar', { params });
+    return this.http.get<CalendarMonth>(`${environment.apiUrl}/pto/calendar`, { params });
   }
 
   audit(): Observable<AuditLogEntry[]> {
-    return this.http.get<AuditLogEntry[]>('/admin/audit');
+    return this.http.get<AuditLogEntry[]>(`${environment.apiUrl}/admin/audit`);
   }
 }
