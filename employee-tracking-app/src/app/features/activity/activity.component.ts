@@ -1,9 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ActivityService } from '../../core/services/activity.service';
+import { TimeEntryService } from '../../core/services/time-entry.service';
 import {
   ActivityRangePreset,
   AppActivityReport,
@@ -23,6 +26,7 @@ import { LoadingSkeletonComponent } from '../../shared/components/loading-skelet
 })
 export class ActivityComponent implements OnInit {
   private readonly activityService = inject(ActivityService);
+  private readonly timeEntry = inject(TimeEntryService);
   readonly store = inject(AuthStore);
   readonly formatHours = formatHours;
 
@@ -35,6 +39,7 @@ export class ActivityComponent implements OnInit {
   range = signal<ActivityRangePreset>('week');
   selectedEmployeeId = signal<string | null>(null);
   report = signal<AppActivityReport | null>(null);
+  workedHours = signal(0);
   users = signal<UserActivitySummary[]>([]);
   loading = signal(true);
   saving = signal(false);
@@ -140,12 +145,47 @@ export class ActivityComponent implements OnInit {
     });
   }
 
+  comparisonLabel(): string {
+    const gap = this.workedHours() - (this.report()?.totalHours ?? 0);
+    const size = formatHours(Math.abs(gap));
+    if (gap > 0.05) return `${size} more on the clock`;
+    if (gap < -0.05) return `${size} more in apps`;
+    return 'Clock time and app time match';
+  }
+
+  exportCsv(): void {
+    const report = this.report();
+    if (!report) return;
+    const rows = [
+      ['App', 'Hours', 'Sessions', 'Share'],
+      ...report.apps.map(app => [app.appName, app.hours, app.sessionCount, `${app.percent}%`]),
+      [],
+      ['Clocked hours', this.workedHours()],
+      ['App hours', report.totalHours]
+    ];
+    const csv = rows.map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `activity-${report.employeeName}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   private loadReport(): void {
+    const range = activityRange(this.range());
     this.loading.set(true);
     this.errorMsg.set(null);
-    this.activityService.getReport(activityRange(this.range()), this.selectedEmployeeId()).subscribe({
-      next: report => {
-        this.report.set(report);
+    forkJoin({
+      report: this.activityService.getReport(range, this.selectedEmployeeId()),
+      worked: this.timeEntry.getWorked(range.from, range.to, this.selectedEmployeeId()).pipe(
+        catchError(() => of({ hours: 0 }))
+      )
+    }).subscribe({
+      next: result => {
+        this.report.set(result.report);
+        this.workedHours.set(result.worked.hours ?? 0);
         this.loading.set(false);
       },
       error: err => {

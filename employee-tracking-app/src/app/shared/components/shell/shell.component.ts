@@ -43,6 +43,8 @@ export class ShellComponent implements OnDestroy {
     { label: 'Dashboard', icon: 'grid_view', route: '/dashboard' },
     { label: 'Activity', icon: 'apps', route: '/activity' },
     { label: 'Time Tracking', icon: 'schedule', route: '/time-tracking', roles: ['Employee', 'Manager'] },
+    { label: 'Schedule', icon: 'event_note', route: '/schedule', roles: ['Employee', 'Manager'] },
+    { label: 'Calendar', icon: 'calendar_month', route: '/calendar' },
     { label: 'Timesheets', icon: 'calendar_month', route: '/timesheets', roles: ['Employee', 'Manager'] },
     { label: 'PTO', icon: 'beach_access', route: '/pto', roles: ['Employee', 'Manager'] },
     { label: 'Approvals', icon: 'task_alt', route: '/approvals', roles: ['Manager', 'Admin'] },
@@ -56,6 +58,7 @@ export class ShellComponent implements OnDestroy {
     { label: 'Holidays', icon: 'celebration', route: '/admin/holidays' },
     { label: 'Overtime Rules', icon: 'bolt', route: '/admin/overtime-rules' },
     { label: 'Pay Periods', icon: 'date_range', route: '/admin/pay-periods' },
+    { label: 'Audit History', icon: 'history', route: '/admin/audit' },
   ];
   constructor() {
     this.currentPath.set(this.router.url);

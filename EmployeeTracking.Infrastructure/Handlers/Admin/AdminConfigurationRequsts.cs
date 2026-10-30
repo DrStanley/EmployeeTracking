@@ -12,7 +12,7 @@ namespace EmployeeTracking.Infrastructure.Handlers.Admin
      CreateAttendancePolicyRequest Request) : IRequest<AttendancePolicyDto>;
 
     public record UpdateAttendancePolicyCommand(
-        Guid Id, UpdateAttendancePolicyRequest Request) : IRequest<AttendancePolicyDto>;
+        Guid Id, UpdateAttendancePolicyRequest Request, Guid? PerformedBy = null) : IRequest<AttendancePolicyDto>;
 
     public record DeleteAttendancePolicyCommand(Guid Id) : IRequest<Unit>;
 

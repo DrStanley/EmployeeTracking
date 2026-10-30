@@ -3,6 +3,7 @@ using EmployeeTracking.Application.Commands.ClockIn;
 using EmployeeTracking.Application.Commands.ClockOut;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Queries.Timesheets;
+using EmployeeTracking.Application.Queries.Workspace;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -146,6 +147,34 @@ namespace EmployeeTracking.API.Controllers
                 EmployeeId: User.GetEmployeeId()
             ), ct));
         }
+        [HttpGet("week")]
+        [Authorize(Roles = "Employee,Manager,Admin")]
+        public async Task<IActionResult> Week(CancellationToken ct)
+            => Ok(await _mediator.Send(new GetWeeklyHoursQuery(User.GetEmployeeId()), ct));
+
+        [HttpGet("worked")]
+        public async Task<IActionResult> Worked(
+            [FromQuery] DateTimeOffset? from,
+            [FromQuery] DateTimeOffset? to,
+            [FromQuery] Guid? employeeId,
+            CancellationToken ct)
+        {
+            var end = to ?? DateTimeOffset.UtcNow;
+            var start = from ?? end.AddDays(-7);
+            return Ok(await _mediator.Send(new GetWorkedHoursQuery(
+                User.GetEmployeeId(),
+                User.IsInRole("Admin"),
+                User.IsInRole("Manager"),
+                employeeId,
+                start,
+                end), ct));
+        }
+
+        [HttpGet("presence")]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Presence(CancellationToken ct)
+            => Ok(await _mediator.Send(new GetPresenceQuery(), ct));
+
         /// <summary>Get today's time entries for the authenticated employee.</summary>
         [HttpGet("today")]
         [Authorize(Roles = "Employee,Manager")]

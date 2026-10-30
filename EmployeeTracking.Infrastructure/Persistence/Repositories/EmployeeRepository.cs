@@ -14,6 +14,7 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
             => await _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.Shift)
+                .Include(e => e.Manager)
                 .Include(e => e.AttendancePolicy)
                 .FirstOrDefaultAsync(e => e.Id == id, ct);
 
@@ -24,6 +25,7 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<Employee>> GetAllAsync(CancellationToken ct = default)
             => await _context.Employees
                 .Include(e => e.Department)
+                .Include(e => e.Shift)
                 .Where(e => e.IsActive)
                 .ToListAsync(ct);
 

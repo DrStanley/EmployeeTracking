@@ -17,6 +17,10 @@
       }
     </div>
 
+    <button type="button" class="btn btn-ghost btn-sm" (click)="exportCsv()" [disabled]="!report()">
+      <mat-icon>download</mat-icon> Export CSV
+    </button>
+
     @if (canViewOthers()) {
       <label class="employee-filter">
         <span class="text-sm font-semibold">Employee</span>
@@ -72,6 +76,21 @@
   @if (loading()) {
     <app-loading-skeleton type="card"></app-loading-skeleton>
   } @else if (report()) {
+    <div class="card compare-card">
+      <h3>Clocked time and app time</h3>
+      <p class="text-muted text-sm">{{ comparisonLabel() }}</p>
+      <div class="compare-row">
+        <div>
+          <span class="stat-label">Clocked</span>
+          <strong>{{ formatHours(workedHours()) }}</strong>
+        </div>
+        <div>
+          <span class="stat-label">Apps</span>
+          <strong>{{ formatHours(report()!.totalHours) }}</strong>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-cols-4 stat-row">
       <div class="card stat-card">
         <div class="stat-icon blue"><mat-icon>schedule</mat-icon></div>

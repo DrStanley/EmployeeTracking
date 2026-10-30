@@ -75,6 +75,14 @@
   margin-bottom: 16px;
 }
 
+.compare-card { margin-bottom: 24px; }
+.compare-card h3 { margin-bottom: 4px; }
+.compare-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+  strong { display: block; font-size: 24px; }
+}
 .stat-row { margin-bottom: 24px; }
 
 .stat-card { position: relative; }

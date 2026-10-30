@@ -111,6 +111,16 @@
   flex-shrink: 0;
 }
 
+.presence-card { margin-bottom: 24px; }
+.presence-list { display: flex; flex-direction: column; gap: 10px; }
+.presence-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.person-name { display: block; font-weight: 600; font-size: 14px; }
+
 .apps-card { margin-bottom: 24px; }
 
 .week-apps {

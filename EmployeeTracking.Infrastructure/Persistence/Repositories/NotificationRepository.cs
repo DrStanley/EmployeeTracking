@@ -1,4 +1,5 @@
 ﻿using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,12 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
             Guid id, CancellationToken ct = default)
             => await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
+
+        public async Task<IReadOnlyList<Notification>> GetByTypeSinceAsync(
+            NotificationType type, DateTimeOffset since, CancellationToken ct = default)
+            => await _context.Notifications
+                .Where(n => n.Type == type && n.SentAt >= since)
+                .ToListAsync(ct);
 
         public async Task AddAsync(
             Notification notification, CancellationToken ct = default)

@@ -35,6 +35,9 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             timesheet.Approve(request.ReviewerId, request.Notes);
             _uow.Timesheets.Update(timesheet);
+            await _uow.AuditLogs.AddAsync(AuditLog.Record(
+                nameof(Timesheet), timesheet.Id.ToString(), "Approved", request.ReviewerId,
+                newValues: request.Notes), ct);
             await _uow.SaveChangesAsync(ct);
 
             // Send approval email — fire and forget so it doesn't block the response

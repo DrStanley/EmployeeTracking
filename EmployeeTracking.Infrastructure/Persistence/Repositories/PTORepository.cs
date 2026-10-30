@@ -33,6 +33,16 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
                                        && e.ManagerId == managerId))
                 .ToListAsync(ct);
 
+        public async Task<IReadOnlyList<PTORequest>> GetApprovedOverlappingAsync(
+            DateOnly start, DateOnly end, CancellationToken ct = default)
+            => await _context.PTORequests
+                .Include(p => p.Employee)
+                .Where(p => p.Status == PTORequestStatus.Approved
+                         && p.StartDate <= end
+                         && p.EndDate >= start)
+                .OrderBy(p => p.StartDate)
+                .ToListAsync(ct);
+
         public async Task<bool> HasOverlappingRequestAsync(
             Guid employeeId, DateOnly start, DateOnly end, CancellationToken ct = default)
             => await _context.PTORequests

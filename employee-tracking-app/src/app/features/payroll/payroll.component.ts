@@ -93,7 +93,9 @@ export class PayrollComponent implements OnInit {
       l.employeeFullName, l.department, l.regularHours, l.overtimeHours,
       l.ptoHours, l.unpaidHours, l.totalPayableHours, l.timesheetStatus
     ]);
-    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

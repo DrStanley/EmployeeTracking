@@ -18,6 +18,7 @@ namespace EmployeeTracking.Application.Interfaces
         IOvertimeRuleRepository OvertimeRules { get; }
         IRefreshTokenRepository RefreshTokens { get; }
         IAppUsageRepository AppUsage { get; }
+        IAuditLogRepository AuditLogs { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }

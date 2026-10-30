@@ -5,6 +5,7 @@ using EmployeeTracking.Application.Commands.RejectPTORequest;
 using EmployeeTracking.Application.Commands.SubmitPTORequest;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Queries.PTO;
+using EmployeeTracking.Application.Queries.Workspace;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,19 @@ namespace EmployeeTracking.API.Controllers
                 new GetPTOBalanceQuery(
                     User.GetEmployeeId(),
                     DateTime.Now.Year), ct));
+
+        [HttpGet("calendar")]
+        public async Task<IActionResult> Calendar(
+            [FromQuery] int? year, [FromQuery] int? month, CancellationToken ct)
+        {
+            var today = DateTime.Today;
+            return Ok(await _mediator.Send(new GetCalendarMonthQuery(
+                User.GetEmployeeId(),
+                User.IsInRole("Admin"),
+                User.IsInRole("Manager"),
+                year ?? today.Year,
+                month ?? today.Month), ct));
+        }
 
         /// <summary>Get all pending PTO requests for the authenticated manager.</summary>
         [HttpGet("pending")]

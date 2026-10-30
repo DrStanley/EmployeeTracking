@@ -1,0 +1,45 @@
+<div class="page-content">
+  <div class="page-head">
+    <h1>Audit history</h1>
+    <p class="text-secondary">Approvals, rejections, and policy changes.</p>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (logs().length === 0) {
+    <app-empty-state
+      icon="history"
+      title="No history yet"
+      message="Approving a timesheet or PTO request, or updating a policy, will show up here.">
+    </app-empty-state>
+  } @else {
+    <div class="card">
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Who</th>
+            <th>Action</th>
+            <th>Record</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr>
+              <td>{{ log.timestamp | date:'MMM d, h:mm a' }}</td>
+              <td>{{ log.performedByName || 'Unknown' }}</td>
+              <td>{{ log.action }}</td>
+              <td>{{ log.entityName }}</td>
+              <td>{{ log.detail || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,32 @@
+<div class="page-content">
+  <div class="page-head">
+    <h1>Schedule</h1>
+    <p class="text-secondary">Your assigned shift for this week.</p>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  } @else if (!schedule()?.shiftName) {
+    <app-empty-state
+      icon="event_note"
+      title="No shift assigned"
+      message="An admin can assign a shift from the Shifts page. Until then, clock in when your workday starts.">
+    </app-empty-state>
+  } @else {
+    <div class="card week">
+      <h3>{{ schedule()!.shiftName }}</h3>
+      <p class="text-muted text-sm">{{ schedule()!.shiftStart }}–{{ schedule()!.shiftEnd }} on weekdays</p>
+      <div class="days">
+        @for (day of schedule()!.days; track day.date) {
+          <div class="day" [class.today]="day.isToday" [class.off]="!day.isWorkday">
+            <span class="day-name">{{ day.dayName.slice(0, 3) }}</span>
+            <span class="day-date">{{ day.date | date:'d' }}</span>
+            <span class="day-hours">{{ day.isWorkday ? day.start + '–' + day.end : 'Off' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

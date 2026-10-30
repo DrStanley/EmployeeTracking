@@ -24,11 +24,17 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Database
-builder.Services.AddDbContext<AppDbContext>(opts =>
-    opts.UseSqlServer(
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
         builder.Configuration.GetConnectionString("Default"),
-        sql => sql.MigrationsAssembly("EmployeeTracking.Infrastructure")));
-
+        sql =>
+        {
+            sql.MigrationsAssembly("EmployeeTracking.Infrastructure");
+            sql.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+        }));
 // ── Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opts =>
 {

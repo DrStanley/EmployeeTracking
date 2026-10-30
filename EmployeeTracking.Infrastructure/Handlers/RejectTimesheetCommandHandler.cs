@@ -26,6 +26,9 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             timesheet.Reject(request.ReviewerId, request.Reason);
             _uow.Timesheets.Update(timesheet);
+            await _uow.AuditLogs.AddAsync(AuditLog.Record(
+                nameof(Timesheet), timesheet.Id.ToString(), "Rejected", request.ReviewerId,
+                newValues: request.Reason), ct);
             await _uow.SaveChangesAsync(ct);
 
             return Unit.Value;

@@ -54,6 +54,9 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             _uow.PTORequests.Update(pto);
             _uow.PTOBalances.Update(balance);
+            await _uow.AuditLogs.AddAsync(AuditLog.Record(
+                nameof(PTORequest), pto.Id.ToString(), "Approved", request.ReviewerId,
+                newValues: $"{pto.HoursRequested}h"), ct);
             await _uow.SaveChangesAsync(ct);
             _ = _emailService.SendPTOApprovedAsync(pto, employee!, ct);
             var reviewer = await _uow.Employees.GetByIdAsync(request.ReviewerId, ct);

@@ -59,6 +59,14 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/forgot-password`, { email });
+  }
+
+  resetPassword(email: string, token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/reset-password`, { email, token, newPassword });
+  }
+
   register(req: RegisterRequest): Observable<AuthResponse> {
     this.store.setLoading(true);
     return this.http.post<AuthResponse>(`${this.base}/register`, req).pipe(

@@ -34,6 +34,9 @@ namespace EmployeeTracking.Infrastructure.Handlers.Admin
                 req.MaxPTOBalanceHours);
 
             _uow.AttendancePolicies.Update(policy);
+            await _uow.AuditLogs.AddAsync(AuditLog.Record(
+                nameof(AttendancePolicy), policy.Id.ToString(), "Updated", request.PerformedBy,
+                newValues: policy.Name), ct);
             await _uow.SaveChangesAsync(ct);
 
             return AdminMappers.MapPolicy(policy);

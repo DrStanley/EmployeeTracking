@@ -54,6 +54,10 @@
       </div>
       @if (userMenuOpen()) {
       <div class="user-menu">
+        <a class="menu-item" routerLink="/profile" (click)="userMenuOpen.set(false)">
+          <span class="material-icons">person</span>
+          Profile
+        </a>
         <button class="menu-item" (click)="toggleDarkMode()">
           <span class="material-icons">{{ darkMode() ? 'light_mode' : 'dark_mode' }}</span>
           {{ darkMode() ? 'Light Mode' : 'Dark Mode' }}

@@ -53,6 +53,13 @@ namespace EmployeeTracking.Infrastructure.Persistence.Repositories
                 .OrderByDescending(t => t.Timestamp)
                 .FirstOrDefaultAsync(ct);
 
+        public async Task<IReadOnlyList<TimeEntry>> GetSinceAsync(
+            DateTimeOffset from, CancellationToken ct = default)
+            => await _context.TimeEntries
+                .Where(t => t.Timestamp >= from)
+                .OrderBy(t => t.Timestamp)
+                .ToListAsync(ct);
+
         public async Task AddAsync(TimeEntry entry, CancellationToken ct = default)
             => await _context.TimeEntries.AddAsync(entry, ct);
 

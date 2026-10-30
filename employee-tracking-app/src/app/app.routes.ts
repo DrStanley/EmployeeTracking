@@ -12,6 +12,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+  },
+  {
     path: '',
     loadComponent: () => import('./shared/components/shell/shell.component').then(m => m.ShellComponent),
     canActivate: [authGuard],
@@ -24,6 +32,19 @@ export const routes: Routes = [
       {
         path: 'activity',
         loadComponent: () => import('./features/activity/activity.component').then(m => m.ActivityComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'schedule',
+        loadComponent: () => import('./features/schedule/schedule.component').then(m => m.ScheduleComponent),
+        canActivate: [roleGuard(['Employee', 'Manager'])]
+      },
+      {
+        path: 'calendar',
+        loadComponent: () => import('./features/calendar/calendar.component').then(m => m.CalendarComponent)
       },
       {
         path: 'time-tracking',
@@ -78,6 +99,10 @@ export const routes: Routes = [
           {
             path: 'pay-periods',
             loadComponent: () => import('./features/admin/pay-periods/pay-periods.component').then(m => m.PayPeriodsComponent)
+          },
+          {
+            path: 'audit',
+            loadComponent: () => import('./features/admin/audit/audit.component').then(m => m.AuditComponent)
           }
         ]
       }

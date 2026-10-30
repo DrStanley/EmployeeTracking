@@ -1,0 +1,44 @@
+<div class="page-content">
+  <div class="page-head">
+    <h1>Profile</h1>
+    <p class="text-secondary">Your job, manager, shift, and PTO balance.</p>
+  </div>
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  } @else if (profile()) {
+    <div class="card identity">
+      <div class="avatar">{{ initials() }}</div>
+      <div>
+        <h2>{{ profile()!.fullName }}</h2>
+        <p class="text-secondary">{{ profile()!.jobTitle }} · {{ profile()!.department }}</p>
+        <p class="text-muted text-sm">{{ profile()!.email }}</p>
+      </div>
+    </div>
+
+    <div class="grid-cols-4 stat-row">
+      <div class="card stat-card">
+        <p class="stat-label">Manager</p>
+        <p class="stat-value detail">{{ profile()!.managerName || 'None assigned' }}</p>
+      </div>
+      <div class="card stat-card">
+        <p class="stat-label">Shift</p>
+        <p class="stat-value detail">{{ profile()!.shiftName || 'None assigned' }}</p>
+        @if (profile()!.shiftStart) {
+          <p class="text-muted text-sm">{{ profile()!.shiftStart }}–{{ profile()!.shiftEnd }}</p>
+        }
+      </div>
+      <div class="card stat-card">
+        <p class="stat-label">PTO available</p>
+        <p class="stat-value">{{ formatHours(profile()!.availablePtoHours) }}</p>
+      </div>
+      <div class="card stat-card">
+        <p class="stat-label">Employment</p>
+        <p class="stat-value detail">{{ profile()!.employmentType }}</p>
+        <p class="text-muted text-sm">{{ profile()!.location || 'No location' }}</p>
+      </div>
+    </div>
+  }
+</div>

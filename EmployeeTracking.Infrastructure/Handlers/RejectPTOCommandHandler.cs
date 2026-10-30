@@ -32,6 +32,9 @@ namespace EmployeeTracking.Infrastructure.Handlers
             pto.Reject(request.ReviewerId, request.Reason);
 
             _uow.PTORequests.Update(pto);
+            await _uow.AuditLogs.AddAsync(AuditLog.Record(
+                nameof(PTORequest), pto.Id.ToString(), "Rejected", request.ReviewerId,
+                newValues: request.Reason), ct);
             await _uow.SaveChangesAsync(ct);
             _ = _emailService.SendPTOApprovedAsync(pto, employee!, ct);
             var reviewer = await _uow.Employees.GetByIdAsync(request.ReviewerId, ct);

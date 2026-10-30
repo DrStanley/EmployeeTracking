@@ -14,7 +14,9 @@ import { Notification } from '../../core/models/notification.models';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
 import { ActivityService } from '../../core/services/activity.service';
+import { TimeEntryService } from '../../core/services/time-entry.service';
 import { AppUsageItem, activityRange, formatHours } from '../../core/models/activity.models';
+import { Presence, WeeklyHours } from '../../core/models/workspace.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,6 +31,7 @@ export class DashboardComponent implements OnInit {
   private readonly timesheetService = inject(TimesheetService);
   private readonly notificationService = inject(NotificationService);
   private readonly activityService = inject(ActivityService);
+  private readonly timeEntry = inject(TimeEntryService);
   readonly formatHours = formatHours;
 
   loading = signal(true);
@@ -36,6 +39,9 @@ export class DashboardComponent implements OnInit {
   pendingApprovals = signal<Timesheet[]>([]);
   recentNotifications = signal<Notification[]>([]);
   weekApps = signal<AppUsageItem[]>([]);
+  clockStatus = signal<string>('clocked-out');
+  clockedInAt = signal<string | null>(null);
+  presence = signal<Presence[]>([]);
 
   today = new Date();
 
@@ -46,7 +52,7 @@ export class DashboardComponent implements OnInit {
     return 'Good evening';
   });
 
-  weeklyHours = signal<Record<string, number>>({ mon: 8, tue: 8, wed: 8, thu: 8, fri: 6, sat: 0, sun: 0 });
+  weeklyHours = signal<Record<string, number>>({ mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 });
 
   ngOnInit(): void {
     const calls: any = {
@@ -58,9 +64,14 @@ export class DashboardComponent implements OnInit {
 
     if (this.store.isEmployee() || this.store.isManager()) {
       calls.balance = this.ptoService.getBalance();
+      calls.status = this.timeEntry.getClockStatus().pipe(catchError(() => of(null)));
+    }
+    if (this.store.isEmployee() || this.store.isManager() || this.store.isAdmin()) {
+      calls.week = this.timeEntry.getWeek().pipe(catchError(() => of(null)));
     }
     if (this.store.isManager() || this.store.isAdmin()) {
       calls.pending = this.timesheetService.getPending();
+      calls.presence = this.timeEntry.getPresence().pipe(catchError(() => of([])));
     }
 
     forkJoin(calls).subscribe({
@@ -69,6 +80,12 @@ export class DashboardComponent implements OnInit {
         if (res.pending) this.pendingApprovals.set(res.pending);
         this.recentNotifications.set((res.notifications ?? []).slice(0, 5));
         this.weekApps.set((res.activity?.apps ?? []).slice(0, 4));
+        if (res.status) {
+          this.clockStatus.set(res.status.status);
+          this.clockedInAt.set(res.status.clockedInAt ?? null);
+        }
+        if (res.week) this.applyWeek(res.week);
+        if (res.presence) this.presence.set(res.presence);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -78,5 +95,28 @@ export class DashboardComponent implements OnInit {
   weekTotal(): number {
     const w = this.weeklyHours();
     return Object.values(w).reduce((a, b) => a + b, 0);
+  }
+
+  statusLabel(): string {
+    switch (this.clockStatus()) {
+      case 'clocked-in': return 'Clocked In';
+      case 'on-break': return 'On Break';
+      default: return 'Clocked Out';
+    }
+  }
+
+  presenceLabel(status: string): string {
+    switch (status) {
+      case 'clocked-in': return 'Working';
+      case 'on-break': return 'On break';
+      default: return 'Out';
+    }
+  }
+
+  private applyWeek(week: WeeklyHours): void {
+    this.weeklyHours.set({
+      mon: week.mon, tue: week.tue, wed: week.wed, thu: week.thu,
+      fri: week.fri, sat: week.sat, sun: week.sun
+    });
   }
 }

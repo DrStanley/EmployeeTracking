@@ -1,5 +1,6 @@
 ﻿using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Interfaces;
+using EmployeeTracking.Domain.Entities;
 using EmployeeTracking.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,10 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace EmployeeTracking.Infrastructure.BackgroundJobs
 {
-    /// <summary>
-    /// Runs every 30 minutes and checks for employees
-    /// who clocked in but never clocked out.
-    /// </summary>
     public class MissedPunchJob : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
@@ -32,12 +29,11 @@ namespace EmployeeTracking.Infrastructure.BackgroundJobs
             while (!ct.IsCancellationRequested)
             {
                 await Task.Delay(_interval, ct);
-
                 try
                 {
                     await RunAsync(ct);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     _logger.LogError(ex, "MissedPunchJob failed.");
                 }
@@ -48,43 +44,68 @@ namespace EmployeeTracking.Infrastructure.BackgroundJobs
         {
             using var scope = _scopeFactory.CreateScope();
             var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var notifications = scope.ServiceProvider
-                .GetRequiredService<INotificationService>();
+            var notifications = scope.ServiceProvider.GetRequiredService<INotificationService>();
+            var now = DateTimeOffset.UtcNow;
+            var today = DateOnly.FromDateTime(now.UtcDateTime);
+            var alreadySent = (await uow.Notifications.GetByTypeSinceAsync(
+                    NotificationType.MissedPunch, now.AddHours(-20), ct))
+                .Select(notification => notification.EmployeeId)
+                .ToHashSet();
+            var holidays = await uow.Holidays.GetByYearAsync(today.Year, ct);
+            var isHoliday = holidays.Any(holiday => OccursOn(holiday, today));
+            var onPto = (await uow.PTORequests.GetApprovedOverlappingAsync(today, today, ct))
+                .Select(request => request.EmployeeId)
+                .ToHashSet();
+            var clockedInToday = (await uow.TimeEntries.GetSinceAsync(
+                    new DateTimeOffset(today.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero), ct))
+                .Where(entry => entry.EntryType == TimeEntryType.ClockIn)
+                .Select(entry => entry.EmployeeId)
+                .ToHashSet();
 
             var employees = await uow.Employees.GetAllAsync(ct);
             var payloads = new List<NotificationPayload>();
 
             foreach (var employee in employees)
             {
-                var hasOpenPunch = await uow.TimeEntries
-                    .HasOpenClockInAsync(employee.Id, ct);
+                if (alreadySent.Contains(employee.Id))
+                    continue;
 
-                if (!hasOpenPunch) continue;
+                var openEntry = await uow.TimeEntries.GetLatestOpenClockInAsync(employee.Id, ct);
+                var hasOpenPunch = await uow.TimeEntries.HasOpenClockInAsync(employee.Id, ct);
+                if (hasOpenPunch && openEntry is not null &&
+                    (now - openEntry.Timestamp).TotalHours >= 10)
+                {
+                    payloads.Add(new NotificationPayload(
+                        employee.Id,
+                        NotificationType.MissedPunch,
+                        $"You have an open clock-in from {openEntry.Timestamp:MMM dd 'at' HH:mm} UTC with no clock-out."));
+                    continue;
+                }
 
-                // Only alert if the open punch is older than 10 hours
-                var openEntry = await uow.TimeEntries
-                    .GetLatestOpenClockInAsync(employee.Id, ct);
-
-                if (openEntry is null) continue;
-
-                var hoursOpen = (DateTimeOffset.UtcNow - openEntry.Timestamp).TotalHours;
-                if (hoursOpen < 10) continue;
-
-                _logger.LogWarning(
-                    "Missed punch detected for employee {EmployeeId} — " +
-                    "open since {Timestamp}",
-                    employee.Id, openEntry.Timestamp);
+                if (isHoliday || today.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+                    continue;
+                if (employee.Shift is not { IsActive: true } shift)
+                    continue;
+                if (now.TimeOfDay < shift.PlannedEnd.ToTimeSpan())
+                    continue;
+                if (onPto.Contains(employee.Id) || clockedInToday.Contains(employee.Id))
+                    continue;
 
                 payloads.Add(new NotificationPayload(
                     employee.Id,
                     NotificationType.MissedPunch,
-                    $"You have an open clock-in from " +
-                    $"{openEntry.Timestamp:MMM dd 'at' HH:mm} UTC " +
-                    $"with no clock-out. Please contact your manager."));
+                    $"You did not clock in for today's {shift.Name} shift ({shift.PlannedStart:HH:mm}–{shift.PlannedEnd:HH:mm})."));
             }
 
-            if (payloads.Any())
+            if (payloads.Count > 0)
                 await notifications.SendBulkAsync(payloads, ct);
+        }
+
+        private static bool OccursOn(Holiday holiday, DateOnly day)
+        {
+            if (!holiday.IsRecurringAnnually)
+                return holiday.Date == day;
+            return holiday.Date.Month == day.Month && holiday.Date.Day == day.Day;
         }
     }
 }

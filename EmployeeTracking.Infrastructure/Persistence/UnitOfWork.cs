@@ -22,6 +22,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public IOvertimeRuleRepository OvertimeRules { get; }
         public IRefreshTokenRepository RefreshTokens { get; }
         public IAppUsageRepository AppUsage { get; }
+        public IAuditLogRepository AuditLogs { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -40,6 +41,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
             OvertimeRules = new OvertimeRuleRepository(context);
             RefreshTokens = new RefreshTokenRepository(context);
             AppUsage = new AppUsageRepository(context);
+            AuditLogs = new AuditLogRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

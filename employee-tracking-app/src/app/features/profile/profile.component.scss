@@ -1,0 +1,32 @@
+.page-head { margin-bottom: 24px; p { margin-top: 6px; } }
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.stat-row { margin-bottom: 24px; }
+.stat-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.stat-value { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+.detail { font-size: 18px; }
+
+.error-banner {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+}

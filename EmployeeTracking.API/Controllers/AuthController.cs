@@ -42,6 +42,25 @@ namespace EmployeeTracking.API.Controllers
             [FromBody] LoginCommand command, CancellationToken ct)
             => Ok(await _mediator.Send(command, ct));
 
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(
+            [FromBody] ForgotPasswordRequest request, CancellationToken ct)
+        {
+            await _mediator.Send(new ForgotPasswordCommand(request.Email), ct);
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(
+            [FromBody] ResetPasswordRequest request, CancellationToken ct)
+        {
+            await _mediator.Send(new ResetPasswordCommand(
+                request.Email, request.Token, request.NewPassword), ct);
+            return Ok();
+        }
+
         /// <summary>
         /// Exchange an expired access token and valid refresh token
         /// for a new token pair.

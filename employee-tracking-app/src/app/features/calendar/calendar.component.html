@@ -1,0 +1,49 @@
+<div class="page-content">
+  <div class="page-head">
+    <div>
+      <h1>Calendar</h1>
+      <p class="text-secondary">Approved time off and company holidays.</p>
+    </div>
+    <div class="month-nav">
+      <button type="button" class="btn btn-ghost btn-sm" (click)="shift(-1)" aria-label="Previous month">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <strong>{{ title() }}</strong>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="shift(1)" aria-label="Next month">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else {
+    <div class="card">
+      <div class="grid head">
+        @for (day of weekdays; track day) { <span>{{ day }}</span> }
+      </div>
+      <div class="grid">
+        @for (cell of cells(); track cell.key) {
+          <div class="cell" [class.empty]="!cell.date">
+            @if (cell.date) {
+              <span class="num">{{ cell.date.getDate() }}</span>
+              @for (holiday of cell.holidays; track holiday.name) {
+                <span class="chip holiday">{{ holiday.name }}</span>
+              }
+              @for (absence of cell.absences.slice(0, 3); track absence.employeeId + absence.startDate) {
+                <span class="chip away">{{ absence.employeeName }}</span>
+              }
+              @if (cell.absences.length > 3) {
+                <span class="chip more">+{{ cell.absences.length - 3 }}</span>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,4 +1,6 @@
-﻿using EmployeeTracking.Application.DTOs;
+﻿using EmployeeTracking.API.Extensions;
+using EmployeeTracking.Application.DTOs;
+using EmployeeTracking.Application.Queries.Workspace;
 using EmployeeTracking.Infrastructure.Handlers.Admin;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +20,10 @@ namespace EmployeeTracking.API.Controllers
         private readonly IMediator _mediator;
 
         public AdminController(IMediator mediator) => _mediator = mediator;
+
+        [HttpGet("audit")]
+        public async Task<IActionResult> Audit(CancellationToken ct)
+            => Ok(await _mediator.Send(new GetAuditLogsQuery(), ct));
 
 
         /// <summary>Get all attendance policies.</summary>
@@ -52,7 +58,7 @@ namespace EmployeeTracking.API.Controllers
         public async Task<IActionResult> UpdatePolicy(
             Guid id, [FromBody] UpdateAttendancePolicyRequest request, CancellationToken ct)
             => Ok(await _mediator.Send(
-                new UpdateAttendancePolicyCommand(id, request), ct));
+                new UpdateAttendancePolicyCommand(id, request, User.GetEmployeeId()), ct));
 
         /// <summary>Delete an attendance policy.</summary>
         [HttpDelete("policies/{id}")]
