@@ -30,6 +30,10 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public DbSet<Holiday> Holidays => Set<Holiday>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<AppUsageSession> AppUsageSessions => Set<AppUsageSession>();
+        public DbSet<ScreenCaptureConfig> ScreenCaptureConfigs => Set<ScreenCaptureConfig>();
+        public DbSet<ScreenReview> ScreenReviews => Set<ScreenReview>();
+        public DbSet<ScreenCaptureFrame> ScreenCaptureFrames => Set<ScreenCaptureFrame>();
+        public DbSet<ScreenAnalysisJob> ScreenAnalysisJobs => Set<ScreenAnalysisJob>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

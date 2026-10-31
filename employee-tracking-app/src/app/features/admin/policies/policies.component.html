@@ -9,6 +9,23 @@
     </button>
   </div>
 
+  <div class="card capture-card">
+    <h3>Screen capture</h3>
+    <p class="text-secondary text-sm">Employees must share their entire screen to clock in. Snapshots are sent to the server. Storage and the review model stay simulated until live mode is turned on.</p>
+    <label class="checkbox">
+      <input type="checkbox" [checked]="captureEnabled()" (change)="captureEnabled.set($any($event.target).checked)">
+      Require screen capture
+    </label>
+    <label class="field">
+      Snapshot every
+      <input class="input interval" type="number" min="1" max="60" [value]="captureInterval()"
+        (input)="captureInterval.set(+$any($event.target).value)">
+      minutes
+    </label>
+    <button type="button" class="btn btn-primary btn-sm" (click)="saveCapture()">Save capture settings</button>
+    @if (captureMsg()) { <p class="text-sm">{{ captureMsg() }}</p> }
+  </div>
+
   @if (loading()) {
     <app-loading-skeleton type="table"></app-loading-skeleton>
   } @else if (policies().length === 0) {

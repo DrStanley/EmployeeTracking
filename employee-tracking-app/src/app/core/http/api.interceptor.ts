@@ -9,7 +9,9 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   // Prepend base URL if relative
   const url = req.url.startsWith('http') ? req.url : `${environment.apiUrl}${req.url}`;
 
-  let headers = req.headers.set('Content-Type', 'application/json');
+  let headers = req.body instanceof FormData
+    ? req.headers.delete('Content-Type')
+    : req.headers.set('Content-Type', 'application/json');
 
   const token = store.accessToken();
   if (token) {

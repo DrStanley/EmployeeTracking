@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../../../core/services/admin.service';
+import { ScreenService } from '../../../core/services/screen.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
 import { AttendancePolicy } from '../../../core/models/admin.models';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -18,10 +19,14 @@ import { LoadingSkeletonComponent } from '../../../shared/components/loading-ske
 export class PoliciesComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
+  private readonly screenApi = inject(ScreenService);
 
   loading = signal(true);
   policies = signal<AttendancePolicy[]>([]);
   showForm = signal(false);
+  captureEnabled = signal(true);
+  captureInterval = signal(5);
+  captureMsg = signal<string | null>(null);
   editingId = signal<string | null>(null);
 
   form = this.fb.nonNullable.group({
@@ -38,6 +43,25 @@ export class PoliciesComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.screenApi.config().subscribe({
+      next: config => {
+        this.captureEnabled.set(config.enabled);
+        this.captureInterval.set(config.intervalMinutes);
+      }
+    });
+  }
+
+  saveCapture(): void {
+    const intervalMinutes = Math.min(60, Math.max(1, Number(this.captureInterval()) || 1));
+    this.captureInterval.set(intervalMinutes);
+    this.screenApi.updateConfig({ enabled: this.captureEnabled(), intervalMinutes }).subscribe({
+      next: config => {
+        this.captureEnabled.set(config.enabled);
+        this.captureInterval.set(config.intervalMinutes);
+        this.captureMsg.set('Screen capture settings saved.');
+      },
+      error: err => this.captureMsg.set(apiErrorMessage(err, 'Could not save screen capture settings.'))
+    });
   }
 
   load(): void {

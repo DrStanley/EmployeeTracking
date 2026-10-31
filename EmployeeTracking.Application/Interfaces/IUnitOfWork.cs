@@ -19,6 +19,7 @@ namespace EmployeeTracking.Application.Interfaces
         IRefreshTokenRepository RefreshTokens { get; }
         IAppUsageRepository AppUsage { get; }
         IAuditLogRepository AuditLogs { get; }
+        IScreenCaptureRepository ScreenCapture { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }

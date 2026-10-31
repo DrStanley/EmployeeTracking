@@ -1,0 +1,22 @@
+.page-head { margin-bottom: 24px; p { margin-top: 6px; } }
+.table-wrap { overflow-x: auto; }
+.lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 14px;
+    vertical-align: top;
+  }
+  th { font-size: 12px; color: var(--color-text-muted); }
+  p + p { margin-top: 6px; }
+}
+.error-banner {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
