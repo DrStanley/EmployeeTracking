@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { Schedule } from '../../core/models/workspace.models';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -25,7 +26,7 @@ export class ScheduleComponent implements OnInit {
         this.loading.set(false);
       },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? err.error?.Detail ?? 'Could not load your schedule.');
+        this.errorMsg.set(apiErrorMessage(err, 'Could not load your schedule.'));
         this.loading.set(false);
       }
     });

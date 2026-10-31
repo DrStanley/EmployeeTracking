@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/auth.service';
+import { apiErrorMessage } from '../../../core/http/api-error';
 
 @Component({
   selector: 'app-forgot-password',
@@ -38,7 +39,7 @@ export class ForgotPasswordComponent {
       },
       error: err => {
         this.sending.set(false);
-        this.errorMsg.set(err.error?.detail ?? err.error?.Detail ?? 'Could not send a reset link.');
+        this.errorMsg.set(apiErrorMessage(err, 'Could not send a reset link.'));
       }
     });
   }

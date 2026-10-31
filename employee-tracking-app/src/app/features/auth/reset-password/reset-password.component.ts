@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/auth.service';
+import { apiErrorMessage } from '../../../core/http/api-error';
 
 @Component({
   selector: 'app-reset-password',
@@ -54,7 +55,7 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: err => {
         this.saving.set(false);
-        this.errorMsg.set(err.error?.detail ?? err.error?.Detail ?? 'This reset link is invalid or has expired.');
+        this.errorMsg.set(apiErrorMessage(err, 'This reset link is invalid or has expired.'));
       }
     });
   }

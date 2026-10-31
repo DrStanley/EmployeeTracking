@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { PayrollService } from '../../core/services/payroll.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { TimesheetService } from '../../core/services/timesheet.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { PayrollReport } from '../../core/models/payroll.models';
@@ -64,7 +65,7 @@ export class PayrollComponent implements OnInit {
     this.payrollService.get(period.id).subscribe({
       next: r => { this.report.set(r); this.loading.set(false); },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? 'No report found. Try generating one.');
+        this.errorMsg.set(apiErrorMessage(err, 'No report found. Try generating one.'));
         this.report.set(null);
         this.loading.set(false);
       }
@@ -79,7 +80,7 @@ export class PayrollComponent implements OnInit {
     this.payrollService.generate(period.id).subscribe({
       next: r => { this.report.set(r); this.generating.set(false); },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? 'Failed to generate report.');
+        this.errorMsg.set(apiErrorMessage(err, 'Failed to generate report.'));
         this.generating.set(false);
       }
     });

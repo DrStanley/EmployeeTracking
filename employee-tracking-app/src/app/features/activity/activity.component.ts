@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ActivityService } from '../../core/services/activity.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import {
   ActivityRangePreset,
@@ -196,8 +197,8 @@ export class ActivityComponent implements OnInit {
     });
   }
 
-  private errorDetail(err: { error?: { detail?: string; Detail?: string } }, fallback: string): string {
-    return err?.error?.detail ?? err?.error?.Detail ?? fallback;
+  private errorDetail(err: unknown, fallback: string): string {
+    return apiErrorMessage(err, fallback);
   }
 
   private todayInput(): string {

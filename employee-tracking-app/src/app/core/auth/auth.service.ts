@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { apiErrorMessage } from '../http/api-error';
 import { AuthStore } from './auth.store';
 import {
   AuthResponse, LoginRequest, RegisterRequest,
@@ -34,6 +35,7 @@ export class AuthService {
   //   );
   // }
   login(req: LoginRequest): Observable<AuthResponse> {
+    this.store.setError(null);
     this.store.setLoading(true);
     return this.http.post<AuthResponse>(`${this.base}/login`, req).pipe(
       tap({
@@ -54,7 +56,7 @@ export class AuthService {
             this.router.navigate(['/dashboard']);
           }
         },
-        error: err => this.store.setError(err.error?.detail ?? 'Login failed')
+        error: err => this.store.setError(apiErrorMessage(err, 'Login failed'))
       })
     );
   }
@@ -68,6 +70,7 @@ export class AuthService {
   }
 
   register(req: RegisterRequest): Observable<AuthResponse> {
+    this.store.setError(null);
     this.store.setLoading(true);
     return this.http.post<AuthResponse>(`${this.base}/register`, req).pipe(
       tap({
@@ -75,7 +78,7 @@ export class AuthService {
           this.store.setTokens(res.accessToken, res.refreshToken);
           this.store.setLoading(false);
         },
-        error: () => this.store.setLoading(false)
+        error: err => this.store.setError(apiErrorMessage(err, 'Could not create the account.'))
       })
     );
   }

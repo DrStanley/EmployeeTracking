@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../../../core/services/admin.service';
+import { apiErrorMessage } from '../../../core/http/api-error';
 import { AttendancePolicy } from '../../../core/models/admin.models';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../../../shared/components/loading-skeleton/loading-skeleton.component';
@@ -79,7 +80,7 @@ export class PoliciesComponent implements OnInit {
     if (!confirm(`Delete policy "${p.name}"? This cannot be undone.`)) return;
     this.adminService.deletePolicy(p.id).subscribe({
       next: () => this.load(),
-      error: err => alert(err.error?.detail ?? 'Failed to delete policy.')
+      error: err => alert(apiErrorMessage(err, 'Failed to delete policy.'))
     });
   }
 }

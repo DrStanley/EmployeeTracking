@@ -35,6 +35,6 @@ export class LoginComponent {
       return;
     }
     const { email, password } = this.form.getRawValue();
-    this.authService.login({ email: email!, password: password! }).subscribe();
+    this.authService.login({ email: email!, password: password! }).subscribe({ error: () => {} });
   }
 }

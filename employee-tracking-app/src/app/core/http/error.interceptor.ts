@@ -2,24 +2,19 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { apiErrorMessage } from './api-error';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const snackBar = inject(MatSnackBar);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 500) {
+      const showOnPage = req.url.includes('/auth/');
+      if (!showOnPage && error.status >= 400 && error.status !== 401) {
         snackBar.open(
-          error.error?.detail ?? 'An unexpected server error occurred.',
+          apiErrorMessage(error, 'Something went wrong.'),
           'Dismiss',
-          { duration: 5000, panelClass: ['snack-error'] }
-        );
-      }
-      if (error.status === 403) {
-        snackBar.open(
-          error.error?.detail ?? 'Access denied. Insufficient permissions.',
-          'Dismiss',
-          { duration: 4000, panelClass: ['snack-warn'] }
+          { duration: 6000, panelClass: [error.status === 403 ? 'snack-warn' : 'snack-error'] }
         );
       }
       return throwError(() => error);
