@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TimesheetService } from '../../core/services/timesheet.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { AuthStore } from '../../core/auth/auth.store';
 import { Timesheet, TimesheetStatus } from '../../core/models/timesheet.models';
 import { PayPeriod } from '../../core/models/admin.models';
@@ -101,7 +102,7 @@ export class TimesheetsComponent implements OnInit {
       if (!confirmed) return;
       this.timesheetService.submit(ts.id).subscribe({
         next: () => this.loadTimesheet(this.selectedPeriod()!.id),
-        error: err => this.errorMsg.set(err.error?.detail ?? 'Failed to submit.')
+        error: err => this.errorMsg.set(apiErrorMessage(err, 'Failed to submit.'))
       });
     });
   }

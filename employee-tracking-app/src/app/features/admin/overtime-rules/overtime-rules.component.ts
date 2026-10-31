@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../../../core/services/admin.service';
+import { apiErrorMessage } from '../../../core/http/api-error';
 import { OvertimeRule, AttendancePolicy } from '../../../core/models/admin.models';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../../../shared/components/loading-skeleton/loading-skeleton.component';
@@ -60,7 +61,7 @@ export class OvertimeRulesComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.adminService.createOvertimeRule(this.form.getRawValue()).subscribe({
       next: () => { this.showForm.set(false); this.load(); },
-      error: err => alert(err.error?.detail ?? 'Failed to create rule.')
+      error: err => alert(apiErrorMessage(err, 'Failed to create rule.'))
     });
   }
 

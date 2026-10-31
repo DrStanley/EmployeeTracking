@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { PTOService } from '../../core/services/pto.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { PTOBalance, PTORequest, PTORequestStatus } from '../../core/models/pto.models';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -77,7 +78,7 @@ export class PtoComponent implements OnInit {
         this.load();
       },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? 'Failed to submit request.');
+        this.errorMsg.set(apiErrorMessage(err, 'Failed to submit request.'));
         this.submitting.set(false);
       }
     });

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { interval, Subscription } from 'rxjs';
 import { TimeEntryService } from '../../core/services/time-entry.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { ClockStatus, TimeEntrySource } from '../../core/models/time-entry.models';
 
 const STORAGE_KEYS = {
@@ -157,7 +158,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         },
         error: err => {
-          this.errorMsg.set(err.error?.detail ?? 'Failed to clock in.');
+          this.errorMsg.set(apiErrorMessage(err, 'Failed to clock in.'));
           this.loading.set(false);
         }
       });
@@ -181,7 +182,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         },
         error: err => {
-          this.errorMsg.set(err.error?.detail ?? 'Failed to clock out.');
+          this.errorMsg.set(apiErrorMessage(err, 'Failed to clock out.'));
           this.loading.set(false);
         }
       });
@@ -200,7 +201,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? 'Failed to start break.');
+        this.errorMsg.set(apiErrorMessage(err, 'Failed to start break.'));
         this.loading.set(false);
       }
     });
@@ -218,7 +219,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
         this.loadTodayEntries();
       },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? 'Failed to end break.');
+        this.errorMsg.set(apiErrorMessage(err, 'Failed to end break.'));
         this.loading.set(false);
       }
     });

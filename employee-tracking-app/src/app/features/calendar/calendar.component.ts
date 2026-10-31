@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { apiErrorMessage } from '../../core/http/api-error';
 import { CalendarAbsence, CalendarHoliday } from '../../core/models/workspace.models';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 
@@ -61,7 +62,7 @@ export class CalendarComponent implements OnInit {
         this.loading.set(false);
       },
       error: err => {
-        this.errorMsg.set(err.error?.detail ?? err.error?.Detail ?? 'Could not load the calendar.');
+        this.errorMsg.set(apiErrorMessage(err, 'Could not load the calendar.'));
         this.loading.set(false);
       }
     });

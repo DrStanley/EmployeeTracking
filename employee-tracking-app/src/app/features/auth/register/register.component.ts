@@ -79,6 +79,6 @@ export class RegisterComponent {
       email: v.email!,
       password: v.password!,
       roles
-    }).subscribe();
+    }).subscribe({ error: () => {} });
   }
 }
