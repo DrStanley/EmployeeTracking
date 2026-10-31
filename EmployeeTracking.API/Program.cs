@@ -6,6 +6,7 @@ using EmployeeTracking.Domain.Entities;
 using EmployeeTracking.Infrastructure.BackgroundJobs;
 using EmployeeTracking.Infrastructure.Identity;
 using EmployeeTracking.Infrastructure.Persistence;
+using EmployeeTracking.Infrastructure.ScreenCapture;
 using EmployeeTracking.Infrastructure.Services;
 using FluentValidation;
 using MediatR;
@@ -201,6 +202,7 @@ builder.Services.Configure<ResendClientOptions>(opts =>
 builder.Services.AddTransient<IResend, ResendClient>();
 
 // Email services
+builder.Services.AddScreenCapture(builder.Configuration);
 builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>();
 
@@ -209,6 +211,7 @@ builder.Services.AddHostedService<MissedPunchJob>();
 builder.Services.AddHostedService<PTOAccrualJob>();
 builder.Services.AddHostedService<OvertimeAlertJob>();
 builder.Services.AddHostedService<TokenCleanupJob>();
+builder.Services.AddHostedService<ScreenAnalysisWorker>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

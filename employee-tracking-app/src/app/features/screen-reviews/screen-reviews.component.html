@@ -1,0 +1,53 @@
+<div class="page-content">
+  <div class="page-head">
+    <h1>Screen reviews</h1>
+    <p class="text-secondary">Reviews finish after clock-out. Only a manager or admin can read them.</p>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (reviews().length === 0) {
+    <app-empty-state
+      icon="monitor"
+      title="No reviews yet"
+      message="A review appears here after the analysis job finishes.">
+    </app-empty-state>
+  } @else {
+    <div class="card table-wrap">
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>When</th>
+            <th>Snapshots</th>
+            <th>Analysis</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (review of reviews(); track review.id) {
+            <tr>
+              <td>{{ review.employeeName }}</td>
+              <td>{{ review.startedAt | date:'MMM d, h:mm a' }} – {{ review.endedAt | date:'h:mm a' }}</td>
+              <td>{{ review.frameCount }}</td>
+              <td>
+                @if (review.status === 'Failed') {
+                  <p>Analysis failed.</p>
+                } @else if (review.status !== 'Ready') {
+                  <p>Analysis is running.</p>
+                } @else {
+                  @for (line of review.findings; track line) {
+                    <p>{{ line }}</p>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

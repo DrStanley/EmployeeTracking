@@ -23,6 +23,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
         public IRefreshTokenRepository RefreshTokens { get; }
         public IAppUsageRepository AppUsage { get; }
         public IAuditLogRepository AuditLogs { get; }
+        public IScreenCaptureRepository ScreenCapture { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -42,6 +43,7 @@ namespace EmployeeTracking.Infrastructure.Persistence
             RefreshTokens = new RefreshTokenRepository(context);
             AppUsage = new AppUsageRepository(context);
             AuditLogs = new AuditLogRepository(context);
+            ScreenCapture = new ScreenCaptureRepository(context);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)

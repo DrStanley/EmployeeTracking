@@ -77,6 +77,11 @@ export const routes: Routes = [
         canActivate: [roleGuard(['Manager', 'Admin'])]
       },
       {
+        path: 'screen-reviews',
+        loadComponent: () => import('./features/screen-reviews/screen-reviews.component').then(m => m.ScreenReviewsComponent),
+        canActivate: [roleGuard(['Manager', 'Admin'])]
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent)
       },

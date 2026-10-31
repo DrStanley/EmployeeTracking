@@ -5,6 +5,9 @@ import { interval, Subscription } from 'rxjs';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { apiErrorMessage } from '../../core/http/api-error';
 import { ClockStatus, TimeEntrySource } from '../../core/models/time-entry.models';
+import { AuthStore } from '../../core/auth/auth.store';
+import { ScreenService } from '../../core/services/screen.service';
+import { ScreenSessionService } from '../../core/screen/screen-session.service';
 
 const STORAGE_KEYS = {
   status: 'et_clockStatus',
@@ -21,6 +24,9 @@ const STORAGE_KEYS = {
 })
 export class TimeTrackingComponent implements OnInit, OnDestroy {
   private readonly timeEntryService = inject(TimeEntryService);
+  private readonly screenApi = inject(ScreenService);
+  private readonly screenSession = inject(ScreenSessionService);
+  private readonly auth = inject(AuthStore);
   private tickSub?: Subscription;
 
   now = signal(new Date());
@@ -31,6 +37,9 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   source = signal<TimeEntrySource>(TimeEntrySource.WebApp);
   loading = signal(false);
   errorMsg = signal<string | null>(null);
+  notice = signal<string | null>(null);
+  captureEnabled = signal(false);
+  captureInterval = signal(5);
   todayEntries = signal<any[]>([]);
 
   sources = [
@@ -51,8 +60,17 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
+  readonly session = this.screenSession;
+
   ngOnInit(): void {
     this.tickSub = interval(1000).subscribe(() => this.now.set(new Date()));
+    this.screenApi.config().subscribe({
+      next: config => {
+        this.captureEnabled.set(config.enabled);
+        this.captureInterval.set(config.intervalMinutes);
+      },
+      error: () => this.captureEnabled.set(false)
+    });
     this.loadTodayEntries();
 
     // Always load real status from API — works across devices and tabs
@@ -144,6 +162,16 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   async clockIn(): Promise<void> {
     this.loading.set(true);
     this.errorMsg.set(null);
+    this.notice.set(null);
+    if (this.captureEnabled()) {
+      try {
+        await this.screenSession.begin(this.captureInterval());
+      } catch (err) {
+        this.errorMsg.set(err instanceof Error ? err.message : 'Share your entire screen to clock in.');
+        this.loading.set(false);
+        return;
+      }
+    }
     const loc = await this.getLocation();
 
     this.timeEntryService.clockIn({ source: this.source(), latitude: loc.lat, longitude: loc.lng })
@@ -158,6 +186,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         },
         error: err => {
+          this.screenSession.cancel();
           this.errorMsg.set(apiErrorMessage(err, 'Failed to clock in.'));
           this.loading.set(false);
         }
@@ -169,6 +198,10 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   async clockOut(): Promise<void> {
     this.loading.set(true);
     this.errorMsg.set(null);
+    this.notice.set(null);
+    const reviewing = this.screenSession.isPending();
+    const started = this.clockedInAt()?.toISOString() ?? new Date().toISOString();
+    if (reviewing) this.screenSession.stopSharing();
     const loc = await this.getLocation();
 
     this.timeEntryService.clockOut({ source: this.source(), latitude: loc.lat, longitude: loc.lng })
@@ -180,6 +213,12 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
           this.clearStorage();
           this.loadTodayEntries();
           this.loading.set(false);
+          if (!reviewing) return;
+          this.notice.set('Clocked out. The screen review is running and will be ready for a manager or admin.');
+          this.screenApi.completeReview(started, new Date().toISOString()).subscribe({
+            next: () => this.screenSession.clear(),
+            error: err => this.errorMsg.set(apiErrorMessage(err, 'Clock-out was saved. The screen review could not be scheduled.'))
+          });
         },
         error: err => {
           this.errorMsg.set(apiErrorMessage(err, 'Failed to clock out.'));

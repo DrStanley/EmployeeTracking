@@ -50,6 +50,7 @@ export class ShellComponent implements OnDestroy {
     { label: 'PTO', icon: 'beach_access', route: '/pto', roles: ['Employee', 'Manager'] },
     { label: 'Approvals', icon: 'task_alt', route: '/approvals', roles: ['Manager', 'Admin'] },
     { label: 'Payroll', icon: 'bar_chart', route: '/payroll', roles: ['Manager', 'Admin'] },
+    { label: 'Screen Reviews', icon: 'monitor', route: '/screen-reviews', roles: ['Manager', 'Admin'] },
     { label: 'Notifications', icon: 'notifications', route: '/notifications' },
   ];
 

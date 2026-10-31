@@ -19,6 +19,20 @@
         </span>
       </div>
 
+      @if (captureEnabled() && status() === 'clocked-out') {
+      <p class="text-muted text-sm capture-note">Clock in shares your entire screen. A window or browser tab is rejected.</p>
+      }
+      @if (session.active() || session.frameCount() > 0) {
+      <p class="text-muted text-sm capture-note">
+        Screen capture is on. {{ session.frameCount() }} snapshot{{ session.frameCount() === 1 ? '' : 's' }} sent for review.
+      </p>
+      }
+      @if (session.shareStopped()) {
+      <div class="error-banner">Screen sharing stopped, so new snapshots are paused.</div>
+      }
+      @if (notice()) {
+      <p class="text-sm capture-note">{{ notice() }}</p>
+      }
       @if (errorMsg()) {
       <div class="error-banner">{{ errorMsg() }}</div>
       }
