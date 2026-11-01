@@ -17,6 +17,20 @@ namespace EmployeeTracking.Application.Queries.Workspace
 
     public record GetEmployeeProfileQuery(Guid EmployeeId) : IRequest<EmployeeProfileDto>;
 
+    public record UpdatePersonalDetailsCommand(
+        Guid EmployeeId,
+        string FirstName,
+        string LastName,
+        string? Gender,
+        DateOnly? DateOfBirth,
+        string? MaritalStatus,
+        string? Phone,
+        string? AddressLine,
+        string? City,
+        string? State,
+        string? PostalCode,
+        string? Country) : IRequest<EmployeeProfileDto>;
+
     public record GetScheduleQuery(Guid EmployeeId) : IRequest<ScheduleDto>;
 
     public record GetCalendarMonthQuery(

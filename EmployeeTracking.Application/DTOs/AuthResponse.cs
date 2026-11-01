@@ -1,4 +1,4 @@
-﻿namespace EmployeeTracking.Application.DTOs
+namespace EmployeeTracking.Application.DTOs
 {
     public record AuthResponse(
         string AccessToken,
@@ -6,6 +6,7 @@
         string Email,
         string FullName,
         IList<string> Roles,
-        DateTime AccessTokenExpiresAt
+        DateTime AccessTokenExpiresAt,
+        string AccountStatus
     );
 }

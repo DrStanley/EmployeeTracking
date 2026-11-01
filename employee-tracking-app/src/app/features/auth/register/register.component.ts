@@ -31,12 +31,7 @@ export class RegisterComponent {
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', Validators.required],
-    roles: this.fb.group({
-      Employee: [true],
-      Manager: [false],
-      Admin: [false]
-    })
+    confirmPassword: ['', Validators.required]
   }, { validators: passwordsMatch });
 
   passwordStrength = computed(() => {
@@ -64,21 +59,12 @@ export class RegisterComponent {
     }
 
     const v = this.form.getRawValue();
-    const roles = Object.entries(v.roles!)
-      .filter(([, checked]) => checked)
-      .map(([role]) => role);
-
-    if (roles.length === 0) {
-      this.store.setError('Select at least one role.');
-      return;
-    }
-
     this.authService.register({
       firstName: v.firstName!,
       lastName: v.lastName!,
       email: v.email!,
       password: v.password!,
-      roles
+      roles: ['Employee']
     }).subscribe({ error: () => {} });
   }
 }

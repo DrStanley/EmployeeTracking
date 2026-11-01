@@ -1,13 +1,13 @@
 <div class="page-content">
   <div class="page-head">
     <h1>Profile</h1>
-    <p class="text-secondary">Your job, manager, shift, and PTO balance.</p>
+    <p class="text-secondary">Your job, contact details, and PTO balance. Email stays as it is.</p>
   </div>
 
   @if (loading()) {
     <app-loading-skeleton type="card"></app-loading-skeleton>
-  } @else if (errorMsg()) {
-    <div class="error-banner">{{ errorMsg() }}</div>
+  } @else if (loadError()) {
+    <div class="error-banner">{{ loadError() }}</div>
   } @else if (profile()) {
     <div class="card identity">
       <div class="avatar">{{ initials() }}</div>
@@ -40,5 +40,74 @@
         <p class="text-muted text-sm">{{ profile()!.location || 'No location' }}</p>
       </div>
     </div>
+
+    <form class="card details" [formGroup]="form" (ngSubmit)="save()">
+      <h3>Personal details</h3>
+      <p class="text-secondary text-sm">Email cannot be changed.</p>
+      @if (notice()) { <p class="notice">{{ notice() }}</p> }
+      @if (errorMsg()) { <div class="error-banner">{{ errorMsg() }}</div> }
+
+      <div class="details-grid">
+        <label class="field">
+          First name
+          <input formControlName="firstName" autocomplete="given-name">
+        </label>
+        <label class="field">
+          Last name
+          <input formControlName="lastName" autocomplete="family-name">
+        </label>
+        <label class="field">
+          Email
+          <input [value]="profile()!.email" disabled>
+        </label>
+        <label class="field">
+          Phone
+          <input formControlName="phone" autocomplete="tel">
+        </label>
+        <label class="field">
+          Gender
+          <select formControlName="gender">
+            @for (option of genders; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          Date of birth
+          <input type="date" formControlName="dateOfBirth" [max]="today">
+        </label>
+        <label class="field">
+          Marital status
+          <select formControlName="maritalStatus">
+            @for (option of maritalStatuses; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          Country
+          <input formControlName="country" autocomplete="country-name">
+        </label>
+        <label class="field wide">
+          Address
+          <input formControlName="addressLine" autocomplete="street-address">
+        </label>
+        <label class="field">
+          City
+          <input formControlName="city" autocomplete="address-level2">
+        </label>
+        <label class="field">
+          State
+          <input formControlName="state" autocomplete="address-level1">
+        </label>
+        <label class="field">
+          Postal code
+          <input formControlName="postalCode" autocomplete="postal-code">
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save details' }}
+      </button>
+    </form>
   }
 </div>

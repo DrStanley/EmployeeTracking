@@ -5,6 +5,7 @@ using EmployeeTracking.Application.Queries.Workspace;
 using EmployeeTracking.Application.Time;
 using EmployeeTracking.Domain.Common;
 using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Domain.Enums;
 using MediatR;
 
 namespace EmployeeTracking.Infrastructure.Handlers
@@ -115,20 +116,79 @@ namespace EmployeeTracking.Infrastructure.Handlers
             var balance = await _uow.PTOBalances.GetByEmployeeAndYearAsync(
                 employee.Id, DateTime.UtcNow.Year, ct);
 
-            return new EmployeeProfileDto(
-                employee.Id,
-                employee.FullName,
-                employee.Email,
-                employee.JobTitle,
-                employee.Location,
-                employee.Department?.Name ?? "Unassigned",
-                employee.Manager?.FullName,
-                employee.Shift?.Name,
-                employee.Shift?.PlannedStart.ToString("HH:mm"),
-                employee.Shift?.PlannedEnd.ToString("HH:mm"),
-                employee.EmploymentType.ToString(),
-                balance?.AvailableHours ?? 0m);
+            return ProfileMap.From(employee, balance?.AvailableHours ?? 0m);
         }
+    }
+
+    public class UpdatePersonalDetailsHandler : IRequestHandler<UpdatePersonalDetailsCommand, EmployeeProfileDto>
+    {
+        private readonly IUnitOfWork _uow;
+        public UpdatePersonalDetailsHandler(IUnitOfWork uow) => _uow = uow;
+
+        public async Task<EmployeeProfileDto> Handle(UpdatePersonalDetailsCommand request, CancellationToken ct)
+        {
+            if (request.EmployeeId == Guid.Empty)
+                throw new DomainException("Employee profile was not found.");
+
+            var employee = await _uow.Employees.GetByIdAsync(request.EmployeeId, ct)
+                ?? throw new NotFoundException(nameof(Employee), request.EmployeeId);
+
+            employee.UpdatePersonalDetails(
+                request.FirstName,
+                request.LastName,
+                Parse<Gender>(request.Gender, "gender"),
+                request.DateOfBirth,
+                Parse<MaritalStatus>(request.MaritalStatus, "marital status"),
+                request.Phone,
+                request.AddressLine,
+                request.City,
+                request.State,
+                request.PostalCode,
+                request.Country);
+
+            _uow.Employees.Update(employee);
+            await _uow.SaveChangesAsync(ct);
+
+            var balance = await _uow.PTOBalances.GetByEmployeeAndYearAsync(
+                employee.Id, DateTime.UtcNow.Year, ct);
+            return ProfileMap.From(employee, balance?.AvailableHours ?? 0m);
+        }
+
+        private static TEnum Parse<TEnum>(string? value, string label) where TEnum : struct, Enum
+        {
+            if (string.IsNullOrWhiteSpace(value)) return default;
+            if (!Enum.TryParse<TEnum>(value.Trim(), true, out var parsed) || !Enum.IsDefined(parsed))
+                throw new DomainException($"Choose a {label} from the list.");
+            return parsed;
+        }
+    }
+
+    internal static class ProfileMap
+    {
+        public static EmployeeProfileDto From(Employee employee, decimal availablePto) => new(
+            employee.Id,
+            employee.FullName,
+            employee.Email,
+            employee.JobTitle,
+            employee.Location,
+            employee.Department?.Name ?? "Unassigned",
+            employee.Manager?.FullName,
+            employee.Shift?.Name,
+            employee.Shift?.PlannedStart.ToString("HH:mm"),
+            employee.Shift?.PlannedEnd.ToString("HH:mm"),
+            employee.EmploymentType.ToString(),
+            availablePto,
+            employee.FirstName,
+            employee.LastName,
+            employee.Gender.ToString(),
+            employee.DateOfBirth,
+            employee.MaritalStatus.ToString(),
+            employee.Phone,
+            employee.AddressLine,
+            employee.City,
+            employee.State,
+            employee.PostalCode,
+            employee.Country);
     }
 
     public class GetScheduleHandler : IRequestHandler<GetScheduleQuery, ScheduleDto>

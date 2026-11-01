@@ -9,10 +9,13 @@
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 .sidebar {
   width: var(--sidebar-width);
+  height: 100%;
+  min-height: 0;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   transition: width var(--transition-normal);
   flex-shrink: 0;
   z-index: 100;
@@ -25,6 +28,7 @@
 .sidebar-header {
   padding: 20px 16px;
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .logo {
@@ -47,10 +51,12 @@
 
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -83,6 +89,7 @@
 .sidebar-footer {
   padding: 12px 8px;
   border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .user-info {

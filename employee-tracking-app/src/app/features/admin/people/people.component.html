@@ -1,0 +1,125 @@
+<div class="page-content">
+  <div class="flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+      <h1>People</h1>
+      <p class="text-secondary">Sign-up creates an employee. Suspend keeps sign-in open but blocks every action. Delete keeps the record, blocks sign-in, and reserves the email.</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <mat-icon>person_add</mat-icon> Add person
+    </button>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="error-banner">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <app-loading-skeleton type="card"></app-loading-skeleton>
+  } @else if (people().length === 0) {
+    <app-empty-state icon="group" title="No accounts yet" message="People appear here after they register, or after you add them."></app-empty-state>
+  } @else {
+    <div class="card table-wrap">
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Job</th>
+            <th>Role</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (person of people(); track person.userId) {
+            <tr>
+              <td>{{ person.fullName || person.email }}</td>
+              <td>{{ person.email }}</td>
+              <td>{{ person.jobTitle || '—' }}</td>
+              <td>
+                @if (person.isAdmin) {
+                  <span class="badge badge-gray">Admin</span>
+                } @else {
+                  <select
+                    class="input role-select"
+                    [value]="person.role"
+                    [disabled]="savingId() === person.userId"
+                    (change)="saveRole(person, $any($event.target).value)">
+                    <option value="Employee">Employee</option>
+                    <option value="Manager">Manager</option>
+                  </select>
+                }
+              </td>
+              <td>
+                @if (person.isAdmin) {
+                  <span class="badge badge-green">Active</span>
+                } @else {
+                  <select
+                    class="input role-select"
+                    [value]="person.accountStatus"
+                    [disabled]="savingId() === person.userId"
+                    (change)="saveStatus(person, $any($event.target).value, $any($event.target))">
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Deleted">Deleted</option>
+                  </select>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="overlay" (click)="showForm.set(false)">
+      <div class="slide-panel" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>Add person</h3>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()" class="panel-form">
+          @if (formError()) {
+            <div class="error-banner">{{ formError() }}</div>
+          }
+          <div class="row">
+            <div class="field">
+              <label>First name</label>
+              <input formControlName="firstName" class="input">
+            </div>
+            <div class="field">
+              <label>Last name</label>
+              <input formControlName="lastName" class="input">
+            </div>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" formControlName="email" class="input">
+          </div>
+          <div class="field">
+            <label>Temporary password</label>
+            <input type="password" formControlName="password" class="input" placeholder="8+ characters, a capital, a number, and a symbol">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Employee number</label>
+              <input formControlName="employeeNumber" class="input">
+            </div>
+            <div class="field">
+              <label>Job title</label>
+              <input formControlName="jobTitle" class="input">
+            </div>
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select formControlName="role" class="input">
+              <option value="Employee">Employee</option>
+              <option value="Manager">Manager</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Add person</button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

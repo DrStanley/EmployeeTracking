@@ -1,4 +1,4 @@
-﻿namespace EmployeeTracking.Domain.Enums
+namespace EmployeeTracking.Domain.Enums
 {
     public enum UserRole { Employee, Manager, Admin, System }
 
@@ -36,6 +36,27 @@
     public enum EmploymentType
     {
         FullTime, PartTime, Contract, Casual
+    }
+
+    public enum Gender
+    {
+        Unspecified, Female, Male, Other, PreferNotToSay
+    }
+
+    public enum MaritalStatus
+    {
+        Unspecified, Single, Married, Divorced, Widowed, Separated, PreferNotToSay
+    }
+
+    public enum AccountStatus
+    {
+        Active, Suspended, Deleted
+    }
+
+    public static class AccountStatusMessages
+    {
+        public const string Suspended = "Your account is suspended.";
+        public const string Deleted = "This account has been deleted.";
     }
 
     public enum AppUsageSource

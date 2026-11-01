@@ -15,3 +15,17 @@ export const authGuard: CanActivateFn = () => {
   }
   return router.createUrlTree(['/login']);
 };
+
+export const activeAccountGuard: CanActivateFn = () => {
+  const store = inject(AuthStore);
+  const router = inject(Router);
+  if (store.accountStatus() === 'Suspended') return router.createUrlTree(['/account-suspended']);
+  return true;
+};
+
+export const suspendedAccountGuard: CanActivateFn = () => {
+  const store = inject(AuthStore);
+  const router = inject(Router);
+  if (store.accountStatus() === 'Suspended') return true;
+  return router.createUrlTree(['/dashboard']);
+};

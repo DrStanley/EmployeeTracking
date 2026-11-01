@@ -1,4 +1,4 @@
-﻿using EmployeeTracking.Application.Commands.Auth;
+using EmployeeTracking.Application.Commands.Auth;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Queries.Auth;
 using MediatR;

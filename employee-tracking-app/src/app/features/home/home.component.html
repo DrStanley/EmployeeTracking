@@ -1,7 +1,7 @@
 <div class="home">
   <header class="top">
     <a class="brand" routerLink="/">
-      <span class="brand-icon"><mat-icon>schedule</mat-icon></span>
+      <img class="app-mark" src="assets/icon.png" alt="">
       <span>
         <strong>EmpTrack</strong>
         <small>Time tracking</small>
@@ -19,7 +19,8 @@
       <p class="eyebrow">For employees, managers, and admins</p>
       <h1>Hours, time off, and who is working. In one place.</h1>
       <p class="lead">
-        Clock in, follow your shift, request PTO, and line app time up with the hours you worked.
+        Clock in on your entire screen, follow your shift, and request time off. The screen review runs after you clock
+        out.
       </p>
       <div class="hero-actions">
         <a routerLink="/login" class="btn btn-primary btn-lg">Sign in</a>
@@ -51,6 +52,7 @@
         <div><span>Alex Morgan</span><b class="on">Working</b></div>
         <div><span>Priya Shah</span><b class="break">On break</b></div>
         <div><span>Jordan Lee</span><b>Out</b></div>
+        <div><span>Screen review</span><b class="on">After clock-out</b></div>
       </div>
     </div>
   </section>
@@ -59,11 +61,11 @@
     <h2>What you can do</h2>
     <div class="feature-grid">
       @for (feature of features; track feature.title) {
-        <article>
-          <span class="feature-icon"><mat-icon>{{ feature.icon }}</mat-icon></span>
-          <h3>{{ feature.title }}</h3>
-          <p>{{ feature.text }}</p>
-        </article>
+      <article>
+        <span class="feature-icon"><mat-icon>{{ feature.icon }}</mat-icon></span>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.text }}</p>
+      </article>
       }
     </div>
   </section>
@@ -72,20 +74,20 @@
     <h2>Who it’s for</h2>
     <div class="role-grid">
       @for (role of roles; track role.title) {
-        <article>
-          <div class="role-head">
-            <span class="feature-icon"><mat-icon>{{ role.icon }}</mat-icon></span>
-            <h3>{{ role.title }}</h3>
-          </div>
-          <ul>
-            @for (item of role.items; track item) {
-              <li>
-                <mat-icon>check</mat-icon>
-                <span>{{ item }}</span>
-              </li>
-            }
-          </ul>
-        </article>
+      <article>
+        <div class="role-head">
+          <span class="feature-icon"><mat-icon>{{ role.icon }}</mat-icon></span>
+          <h3>{{ role.title }}</h3>
+        </div>
+        <ul>
+          @for (item of role.items; track item) {
+          <li>
+            <mat-icon>check</mat-icon>
+            <span>{{ item }}</span>
+          </li>
+          }
+        </ul>
+      </article>
       }
     </div>
   </section>

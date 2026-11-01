@@ -1,4 +1,5 @@
-﻿using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,6 +28,19 @@ namespace EmployeeTracking.Infrastructure.Persistence.Configurations
             builder.Property(e => e.EmploymentType)
                 .HasConversion<string>()
                 .HasMaxLength(20);
+
+            builder.Property(e => e.AccountStatus)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasDefaultValue(AccountStatus.Active);
+            builder.Property(e => e.Gender).HasConversion<string>().HasMaxLength(20).HasDefaultValue(Gender.Unspecified);
+            builder.Property(e => e.MaritalStatus).HasConversion<string>().HasMaxLength(20).HasDefaultValue(MaritalStatus.Unspecified);
+            builder.Property(e => e.Phone).HasMaxLength(30);
+            builder.Property(e => e.AddressLine).HasMaxLength(200);
+            builder.Property(e => e.City).HasMaxLength(100);
+            builder.Property(e => e.State).HasMaxLength(100);
+            builder.Property(e => e.PostalCode).HasMaxLength(20);
+            builder.Property(e => e.Country).HasMaxLength(100);
 
             builder.Property(e => e.CreatedByUserId)
                 .HasMaxLength(450)

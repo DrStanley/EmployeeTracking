@@ -1,6 +1,7 @@
-﻿using EmployeeTracking.Application.Commands.Auth;
+using EmployeeTracking.Application.Commands.Auth;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Interfaces;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -42,17 +43,20 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
             if (!result.Succeeded)
                 throw new UnauthorizedAccessException("Invalid email or password.");
-            // Get the employee record to use the real full name
+
             var employee = user.EmployeeId != Guid.Empty
                 ? await _uow.Employees.GetByIdAsync(user.EmployeeId, ct)
-                : null;
+                : await _uow.Employees.GetByEmailAsync(user.Email!, ct);
+            var status = AccountAccess.Resolve(user.AccountStatus, employee?.AccountStatus);
+            if (status == AccountStatus.Deleted)
+                throw new UnauthorizedAccessException(AccountStatusMessages.Deleted);
 
             var fullName = employee?.FullName ?? user.Email!;
 
 
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _jwtTokenService.GenerateAccessToken(
-                user.Id, user.Email!, user.EmployeeId, roles);
+                user.Id, user.Email!, fullName, user.EmployeeId, roles);
             var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id);
 
             // Revoke any old refresh tokens for this user (single session)
@@ -68,7 +72,8 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 Email: user.Email!,
                 FullName:fullName!,
                 Roles: roles,
-                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15));
+                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
+                AccountStatus: status.ToString());
         }
     }
 }

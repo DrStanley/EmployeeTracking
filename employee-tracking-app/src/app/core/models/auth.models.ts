@@ -5,6 +5,7 @@ export interface AuthResponse {
   fullName: string;
   roles: string[];
   accessTokenExpiresAt: string;
+  accountStatus: 'Active' | 'Suspended' | 'Deleted';
 }
 
 export interface LoginRequest {
@@ -44,6 +45,7 @@ export interface AuthState {
   refreshToken: string | null;
   isLoading: boolean;
   error: string | null;
+  accountStatus: 'Active' | 'Suspended' | 'Deleted';
 }
 
 export interface DecodedToken {
@@ -52,6 +54,7 @@ export interface DecodedToken {
   'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': string;
   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string | string[];
   employeeId: string;
+  fullName?: string;
   exp: number;
   iss: string;
   aud: string;
@@ -68,7 +71,8 @@ export function mapDecodedToUser(decoded: DecodedToken): CurrentUser {
   return {
     userId: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
     email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-    fullName: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+    fullName: decoded.fullName
+      || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
     employeeId: decoded.employeeId,
     roles
   };

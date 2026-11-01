@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { activeAccountGuard, authGuard, suspendedAccountGuard } from './core/auth/auth.guard';
 import { roleGuard } from './core/auth/role.guard';
 
 export const routes: Routes = [
@@ -25,9 +25,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
   },
   {
+    path: 'account-suspended',
+    canActivate: [authGuard, suspendedAccountGuard],
+    loadComponent: () => import('./features/auth/suspended/suspended.component').then(m => m.SuspendedComponent)
+  },
+  {
     path: '',
     loadComponent: () => import('./shared/components/shell/shell.component').then(m => m.ShellComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, activeAccountGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -89,7 +94,11 @@ export const routes: Routes = [
         path: 'admin',
         canActivate: [roleGuard(['Admin'])],
         children: [
-          { path: '', redirectTo: 'policies', pathMatch: 'full' },
+          { path: '', redirectTo: 'people', pathMatch: 'full' },
+          {
+            path: 'people',
+            loadComponent: () => import('./features/admin/people/people.component').then(m => m.PeopleComponent)
+          },
           {
             path: 'policies',
             loadComponent: () => import('./features/admin/policies/policies.component').then(m => m.PoliciesComponent)

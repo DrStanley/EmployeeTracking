@@ -20,6 +20,23 @@ namespace EmployeeTracking.API.Controllers
         public async Task<IActionResult> Me(CancellationToken ct)
             => Ok(await _mediator.Send(new GetEmployeeProfileQuery(User.GetEmployeeId()), ct));
 
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMe(
+            [FromBody] UpdatePersonalDetailsRequest request, CancellationToken ct)
+            => Ok(await _mediator.Send(new UpdatePersonalDetailsCommand(
+                User.GetEmployeeId(),
+                request.FirstName,
+                request.LastName,
+                request.Gender,
+                request.DateOfBirth,
+                request.MaritalStatus,
+                request.Phone,
+                request.AddressLine,
+                request.City,
+                request.State,
+                request.PostalCode,
+                request.Country), ct));
+
         [HttpGet("schedule")]
         [Authorize(Roles = "Employee,Manager")]
         public async Task<IActionResult> Schedule(CancellationToken ct)

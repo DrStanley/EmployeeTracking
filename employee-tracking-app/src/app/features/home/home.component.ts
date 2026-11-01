@@ -19,17 +19,18 @@ export class HomeComponent {
     {
       icon: 'person',
       title: 'Employees',
-      items: ['Clock in and take breaks', 'See this week’s hours', 'Log time in other apps', 'Request time off']
+      items: ['Create an account as an employee', 'Share your entire screen to clock in', 'Clock in and take breaks', 'See this week’s hours', 'Request time off']
     },
     {
       icon: 'groups',
       title: 'Managers and admins',
-      items: ['See who is working', 'Approve timesheets and PTO', 'Run payroll', 'Review policy changes']
+      items: ['Admins assign manager access and add people', 'See who is working', 'Read screen reviews', 'Approve timesheets and PTO', 'Run payroll']
     }
   ];
 
   readonly features = [
-    { icon: 'schedule', title: 'Clock and breaks', text: 'Punch in, start a break, and see today’s status from the real clock, not a sample week.' },
+    { icon: 'schedule', title: 'Clock and breaks', text: 'Clock in shares your entire screen. Snapshots are sent while you work, and clock-out is saved right away.' },
+    { icon: 'monitor', title: 'Screen review', text: 'After clock-out, the session is reviewed in the background. Managers and admins read the result. Employees do not.' },
     { icon: 'apps', title: 'App hours', text: 'Compare time spent in EmpTrack and other apps with the hours you actually clocked.' },
     { icon: 'event_note', title: 'Shift schedule', text: 'See the week you are assigned, including which days are off.' },
     { icon: 'calendar_month', title: 'PTO calendar', text: 'Approved time off and company holidays on one month view.' },

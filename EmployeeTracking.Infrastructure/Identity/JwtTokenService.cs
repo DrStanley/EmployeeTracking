@@ -17,16 +17,19 @@ namespace EmployeeTracking.Infrastructure.Identity
         public string GenerateAccessToken(
             string userId,
             string email,
+            string fullName,
             Guid employeeId,
             IList<string> roles)
         {
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            var name = string.IsNullOrWhiteSpace(fullName) ? email : fullName.Trim();
 
             var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId),
-            new(ClaimTypes.Name,           email),
+            new(ClaimTypes.Name,           name),
+            new("fullName",                name),
             new(ClaimTypes.Email,          email),
             new("employeeId",              employeeId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

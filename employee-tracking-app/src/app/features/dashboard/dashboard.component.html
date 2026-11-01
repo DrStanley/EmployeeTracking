@@ -1,7 +1,7 @@
 <div class="page-content">
   <div class="page-head">
     <div>
-      <h1>{{ greeting() }}, {{ store.firstName() }}</h1>
+      <h1>{{ greeting() }}{{ store.firstName() ? ', ' + store.firstName() : '' }}</h1>
       <p class="text-secondary">{{ today | date: 'EEEE, MMMM d, y' }}</p>
     </div>
   </div>
