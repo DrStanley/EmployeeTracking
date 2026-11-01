@@ -29,8 +29,14 @@ export class ScreenSessionService {
     const video = document.createElement('video');
     video.srcObject = stream;
     video.muted = true;
-    await video.play();
+    video.playsInline = true;
+    video.autoplay = true;
+    video.setAttribute('aria-hidden', 'true');
+    video.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:0;top:0';
+    document.body.appendChild(video);
     this.video = video;
+    await video.play();
+    await this.waitForFrame(video);
 
     stream.getVideoTracks()[0]?.addEventListener('ended', () => {
       if (this.closing) return;
@@ -93,9 +99,33 @@ export class ScreenSessionService {
     return stream;
   }
 
+  private waitForFrame(video: HTMLVideoElement): Promise<void> {
+    if (video.videoWidth > 0) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const started = window.setInterval(() => {
+        if (video.videoWidth > 0) {
+          window.clearInterval(started);
+          window.clearTimeout(giveUp);
+          resolve();
+        }
+      }, 100);
+      const giveUp = window.setTimeout(() => {
+        window.clearInterval(started);
+        reject(new Error('The shared screen did not produce an image, so clock in was not started.'));
+      }, 5000);
+    });
+  }
+
   private async capture(): Promise<void> {
     const video = this.video;
-    if (!video || !video.videoWidth) return;
+    if (!video) return;
+    if (!video.videoWidth) {
+      try {
+        await this.waitForFrame(video);
+      } catch {
+        return;
+      }
+    }
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -119,6 +149,7 @@ export class ScreenSessionService {
     this.closing = true;
     this.clearTimer();
     this.video?.pause();
+    this.video?.remove();
     this.video = null;
     this.stream?.getTracks().forEach(track => track.stop());
     this.stream = null;

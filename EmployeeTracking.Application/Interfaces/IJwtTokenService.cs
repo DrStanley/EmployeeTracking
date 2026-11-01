@@ -5,7 +5,7 @@ namespace EmployeeTracking.Application.Interfaces
 {
     public interface IJwtTokenService
     {
-        string GenerateAccessToken(string userId, string email, Guid employeeId, IList<string> roles);
+        string GenerateAccessToken(string userId, string email, string fullName, Guid employeeId, IList<string> roles);
         RefreshToken GenerateRefreshToken(string userId);
 
         // Read claims from an expired access token

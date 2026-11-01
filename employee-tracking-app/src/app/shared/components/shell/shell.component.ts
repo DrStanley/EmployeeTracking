@@ -55,6 +55,7 @@ export class ShellComponent implements OnDestroy {
   ];
 
   readonly adminNavItems: NavItem[] = [
+    { label: 'People', icon: 'group', route: '/admin/people' },
     { label: 'Policies', icon: 'rule', route: '/admin/policies' },
     { label: 'Shifts', icon: 'work_history', route: '/admin/shifts' },
     { label: 'Holidays', icon: 'celebration', route: '/admin/holidays' },
@@ -148,8 +149,12 @@ export class ShellComponent implements OnDestroy {
     });
   }
 
-  getInitials(): string {
+  personName(): string {
     const name = this.store.user()?.fullName ?? '';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.includes('@') ? '' : name;
+  }
+
+  getInitials(): string {
+    return this.personName().split(' ').filter(part => part).map(part => part[0]).join('').toUpperCase().slice(0, 2);
   }
 }

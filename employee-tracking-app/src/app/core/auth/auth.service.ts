@@ -40,21 +40,11 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.base}/login`, req).pipe(
       tap({
         next: res => {
-          this.store.setTokens(res.accessToken, res.refreshToken);
+          this.store.setTokens(res.accessToken, res.refreshToken, res.fullName);
+          this.store.setAccountStatus(res.accountStatus);
           this.store.setLoading(false);
 
-          // Read role directly from the response, not from the store
-          // (store may not have updated yet when this runs)
-          const isAdmin = res.roles.includes('Admin');
-          const isManager = res.roles.includes('Manager');
-
-          if (isAdmin) {
-            this.router.navigate(['/admin']);
-          } else if (isManager) {
-            this.router.navigate(['/approvals']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+          this.router.navigate(res.accountStatus === 'Suspended' ? ['/account-suspended'] : ['/dashboard']);
         },
         error: err => this.store.setError(apiErrorMessage(err, 'Login failed'))
       })
@@ -75,8 +65,10 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.base}/register`, req).pipe(
       tap({
         next: (res) => {
-          this.store.setTokens(res.accessToken, res.refreshToken);
+          this.store.setTokens(res.accessToken, res.refreshToken, res.fullName);
+          this.store.setAccountStatus(res.accountStatus);
           this.store.setLoading(false);
+          this.router.navigate(res.accountStatus === 'Suspended' ? ['/account-suspended'] : ['/dashboard']);
         },
         error: err => this.store.setError(apiErrorMessage(err, 'Could not create the account.'))
       })
@@ -86,7 +78,8 @@ export class AuthService {
   refresh(req: RefreshTokenRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.base}/refresh`, req).pipe(
       tap(res => {
-        this.store.setTokens(res.accessToken, res.refreshToken);
+        this.store.setTokens(res.accessToken, res.refreshToken, res.fullName);
+        this.store.setAccountStatus(res.accountStatus);
       })
     );
   }

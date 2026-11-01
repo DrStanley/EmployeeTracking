@@ -31,7 +31,31 @@ namespace EmployeeTracking.Application.DTOs
         string? ShiftStart,
         string? ShiftEnd,
         string EmploymentType,
-        decimal AvailablePtoHours);
+        decimal AvailablePtoHours,
+        string FirstName,
+        string LastName,
+        string Gender,
+        DateOnly? DateOfBirth,
+        string MaritalStatus,
+        string? Phone,
+        string? AddressLine,
+        string? City,
+        string? State,
+        string? PostalCode,
+        string? Country);
+
+    public record UpdatePersonalDetailsRequest(
+        string FirstName,
+        string LastName,
+        string? Gender,
+        DateOnly? DateOfBirth,
+        string? MaritalStatus,
+        string? Phone,
+        string? AddressLine,
+        string? City,
+        string? State,
+        string? PostalCode,
+        string? Country);
 
     public record ScheduleDayDto(
         DateOnly Date,

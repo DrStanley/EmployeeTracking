@@ -34,6 +34,31 @@ export interface EmployeeProfile {
   shiftEnd?: string | null;
   employmentType: string;
   availablePtoHours: number;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth?: string | null;
+  maritalStatus: string;
+  phone?: string | null;
+  addressLine?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+}
+
+export interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth?: string | null;
+  maritalStatus: string;
+  phone?: string | null;
+  addressLine?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
 }
 
 export interface ScheduleDay {

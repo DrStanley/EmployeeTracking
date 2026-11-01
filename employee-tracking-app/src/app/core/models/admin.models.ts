@@ -46,6 +46,27 @@ export interface PayPeriod {
   isLocked: boolean;
 }
 
+export interface PersonAccount {
+  userId: string;
+  employeeId: string;
+  email: string;
+  fullName: string;
+  jobTitle: string;
+  role: string;
+  isAdmin: boolean;
+  accountStatus: 'Active' | 'Suspended' | 'Deleted' | string;
+}
+
+export interface AddPersonRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  employeeNumber: string;
+  jobTitle: string;
+  role: 'Employee' | 'Manager';
+}
+
 export interface PTOAccrualSettings {
   attendancePolicyId: string;
   attendancePolicyName: string;

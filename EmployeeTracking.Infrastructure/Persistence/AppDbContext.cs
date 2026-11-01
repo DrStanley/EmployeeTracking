@@ -1,5 +1,6 @@
-﻿using EmployeeTracking.Domain.Common;
+using EmployeeTracking.Domain.Common;
 using EmployeeTracking.Domain.Entities;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,13 @@ namespace EmployeeTracking.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            modelBuilder.Entity<ApplicationUser>(user =>
+            {
+                user.Property(u => u.AccountStatus)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .HasDefaultValue(AccountStatus.Active);
+            });
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken ct = default)

@@ -219,6 +219,15 @@ a {
   animation: fadeIn var(--transition-slow) ease;
 }
 
+.app-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 // ── Scrollbar Styling ─────────────────────────────────────────────────────────
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

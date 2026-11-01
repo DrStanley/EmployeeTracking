@@ -4,9 +4,7 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <div class="logo-icon">
-          <span class="material-icons">schedule</span>
-        </div>
+        <img class="app-mark" src="assets/icon.png" alt="">
         @if (sidebarOpen()) {
         <div class="logo-text">
           <span class="logo-title">EmpTrack</span>
@@ -16,36 +14,38 @@
       </div>
     </div>
 
-    <!-- Main nav items -->
-    <nav class="nav">
-      @for (item of visibleNavItems(); track item.route) {
-      <a class="nav-item" [class.active]="currentPath().startsWith(item.route)" [routerLink]="item.route"
-        [title]="isCollapsed() ? item.label : ''">
-        <mat-icon>{{ item.icon }}</mat-icon>
-      @if (sidebarOpen()) {  <span>{{ item.label }}</span>}
-      </a>
-      }
-    </nav>
+    <div class="sidebar-nav">
+      <!-- Main nav items -->
+      <nav class="nav">
+        @for (item of visibleNavItems(); track item.route) {
+        <a class="nav-item" [class.active]="currentPath().startsWith(item.route)" [routerLink]="item.route"
+          [title]="isCollapsed() ? item.label : ''">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (sidebarOpen()) { <span>{{ item.label }}</span>}
+        </a>
+        }
+      </nav>
 
-    <!-- Admin section — only shown to Admins -->
-    @if (store.isAdmin()) {
-    <div class="nav-section-label">Admin</div>
-    <nav class="nav">
-      @for (item of adminNavItems; track item.route) {
-      <a class="nav-item" [class.active]="currentPath() === item.route" [routerLink]="item.route"
-        [title]="isCollapsed() ? item.label : ''">
-        <mat-icon>{{ item.icon }}</mat-icon>
-      @if (sidebarOpen()) {  <span>{{ item.label }}</span>}
-      </a>
+      <!-- Admin section — only shown to Admins -->
+      @if (store.isAdmin()) {
+      <div class="nav-section-label">Admin</div>
+      <nav class="nav">
+        @for (item of adminNavItems; track item.route) {
+        <a class="nav-item" [class.active]="currentPath() === item.route" [routerLink]="item.route"
+          [title]="isCollapsed() ? item.label : ''">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (sidebarOpen()) { <span>{{ item.label }}</span>}
+        </a>
+        }
+      </nav>
       }
-    </nav>
-    }
+    </div>
     <div class="sidebar-footer">
       @if (sidebarOpen()) {
       <div class="user-info">
         <div class="avatar">{{ getInitials() }}</div>
         <div class="user-details">
-          <span class="user-name">{{ store.user()?.fullName }}</span>
+          <span class="user-name">{{ personName() }}</span>
           <span class="user-role">{{ store.primaryRole() }}</span>
         </div>
         <button class="icon-btn" (click)="toggleUserMenu()" aria-label="User menu">

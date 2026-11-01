@@ -1,4 +1,4 @@
-﻿using EmployeeTracking.Domain.Common;
+using EmployeeTracking.Domain.Common;
 
 namespace EmployeeTracking.Domain.Entities
 {

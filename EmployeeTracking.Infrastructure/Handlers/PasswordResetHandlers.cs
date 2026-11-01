@@ -2,6 +2,7 @@ using EmployeeTracking.Application.Commands.Auth;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Interfaces;
 using EmployeeTracking.Domain.Common;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +33,7 @@ namespace EmployeeTracking.Infrastructure.Handlers
         public async Task<Unit> Handle(ForgotPasswordCommand request, CancellationToken ct)
         {
             var user = await _users.FindByEmailAsync(request.Email);
-            if (user is null || string.IsNullOrWhiteSpace(user.Email))
+            if (user is null || string.IsNullOrWhiteSpace(user.Email) || user.AccountStatus == AccountStatus.Deleted)
                 return Unit.Value;
 
             var token = await _users.GeneratePasswordResetTokenAsync(user);
@@ -59,8 +60,9 @@ namespace EmployeeTracking.Infrastructure.Handlers
 
         public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken ct)
         {
-            var user = await _users.FindByEmailAsync(request.Email)
-                ?? throw new DomainException("This reset link is invalid or has expired.");
+            var user = await _users.FindByEmailAsync(request.Email);
+            if (user is null || user.AccountStatus == AccountStatus.Deleted)
+                throw new DomainException("This reset link is invalid or has expired.");
             var result = await _users.ResetPasswordAsync(user, request.Token, request.NewPassword);
             if (!result.Succeeded)
                 throw new DomainException(string.Join(" ", result.Errors.Select(error => error.Description)));

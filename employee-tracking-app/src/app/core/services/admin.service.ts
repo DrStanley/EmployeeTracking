@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AttendancePolicy, OvertimeRule, Shift, Holiday,
-  PayPeriod, PTOAccrualSettings
+  PayPeriod, PTOAccrualSettings, PersonAccount, AddPersonRequest
 } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
@@ -43,4 +43,15 @@ export class AdminService {
   getPayPeriods(): Observable<PayPeriod[]>          { return this.http.get<PayPeriod[]>(`${this.base}/pay-periods`); }
   createPayPeriod(b: Partial<PayPeriod>): Observable<PayPeriod> { return this.http.post<PayPeriod>(`${this.base}/pay-periods`, b); }
   lockPayPeriod(id: string): Observable<PayPeriod> { return this.http.post<PayPeriod>(`${this.base}/pay-periods/${id}/lock`, {}); }
+
+  getPeople(): Observable<PersonAccount[]> { return this.http.get<PersonAccount[]>(`${this.base}/people`); }
+  setPersonRole(userId: string, role: string): Observable<PersonAccount> {
+    return this.http.put<PersonAccount>(`${this.base}/people/${userId}/role`, { role });
+  }
+  setPersonStatus(userId: string, accountStatus: string): Observable<PersonAccount> {
+    return this.http.put<PersonAccount>(`${this.base}/people/${userId}/status`, { accountStatus });
+  }
+  addPerson(body: AddPersonRequest): Observable<PersonAccount> {
+    return this.http.post<PersonAccount>(`${this.base}/people`, body);
+  }
 }

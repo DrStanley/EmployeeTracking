@@ -1,6 +1,7 @@
-﻿using EmployeeTracking.Application.Commands.Auth;
+using EmployeeTracking.Application.Commands.Auth;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Interfaces;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -73,10 +74,17 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 throw new UnauthorizedAccessException(
                     "Account is locked. Please contact your administrator.");
 
-            // 4. Generate new token pair
+            var employee = user.EmployeeId != Guid.Empty
+                ? await _uow.Employees.GetByIdAsync(user.EmployeeId, ct)
+                : null;
+            var status = AccountAccess.Resolve(user.AccountStatus, employee?.AccountStatus);
+            if (status == AccountStatus.Deleted)
+                throw new UnauthorizedAccessException(AccountStatusMessages.Deleted);
+
+            var fullName = employee?.FullName ?? user.Email!;
             var roles = await _userManager.GetRolesAsync(user);
             var newAccessToken = _jwtTokenService.GenerateAccessToken(
-                user.Id, user.Email!, user.EmployeeId, roles);
+                user.Id, user.Email!, fullName, user.EmployeeId, roles);
             var newRefreshToken = _jwtTokenService.GenerateRefreshToken(user.Id);
 
             // 5. Rotate — revoke the old refresh token and save the new one
@@ -92,9 +100,10 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 AccessToken: newAccessToken,
                 RefreshToken: newRefreshToken.Token,
                 Email: user.Email!,
-                FullName: user.UserName ?? user.Email!,
+                FullName: fullName,
                 Roles: roles,
-                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15));
+                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
+                AccountStatus: status.ToString());
         }
     }
 }

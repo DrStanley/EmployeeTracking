@@ -38,8 +38,9 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   loading = signal(false);
   errorMsg = signal<string | null>(null);
   notice = signal<string | null>(null);
-  captureEnabled = signal(false);
+  captureEnabled = signal(true);
   captureInterval = signal(5);
+  private configLoaded: Promise<void> = Promise.resolve();
   todayEntries = signal<any[]>([]);
 
   sources = [
@@ -64,12 +65,15 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.tickSub = interval(1000).subscribe(() => this.now.set(new Date()));
-    this.screenApi.config().subscribe({
-      next: config => {
-        this.captureEnabled.set(config.enabled);
-        this.captureInterval.set(config.intervalMinutes);
-      },
-      error: () => this.captureEnabled.set(false)
+    this.configLoaded = new Promise(resolve => {
+      this.screenApi.config().subscribe({
+        next: config => {
+          this.captureEnabled.set(config.enabled);
+          this.captureInterval.set(config.intervalMinutes);
+          resolve();
+        },
+        error: () => resolve()
+      });
     });
     this.loadTodayEntries();
 
@@ -163,6 +167,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.errorMsg.set(null);
     this.notice.set(null);
+    await this.configLoaded;
     if (this.captureEnabled()) {
       try {
         await this.screenSession.begin(this.captureInterval());

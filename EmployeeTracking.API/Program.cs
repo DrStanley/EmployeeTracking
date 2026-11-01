@@ -1,4 +1,4 @@
-﻿using EmployeeTracking.API.Extensions;
+using EmployeeTracking.API.Extensions;
 using EmployeeTracking.API.Middleware;
 using EmployeeTracking.Application.Behaviours;
 using EmployeeTracking.Application.Interfaces;
@@ -281,6 +281,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
+app.UseMiddleware<AccountStatusMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

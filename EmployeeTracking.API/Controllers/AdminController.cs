@@ -1,4 +1,5 @@
-﻿using EmployeeTracking.API.Extensions;
+using EmployeeTracking.API.Extensions;
+using EmployeeTracking.Application.Commands.People;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Queries.Workspace;
 using EmployeeTracking.Infrastructure.Handlers.Admin;
@@ -223,5 +224,27 @@ namespace EmployeeTracking.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> LockPayPeriod(Guid id, CancellationToken ct)
             => Ok(await _mediator.Send(new LockPayPeriodCommand(id), ct));
+
+        [HttpGet("people")]
+        public async Task<IActionResult> People(CancellationToken ct)
+            => Ok(await _mediator.Send(new ListPeopleQuery(), ct));
+
+        [HttpPut("people/{userId}/role")]
+        public async Task<IActionResult> SetPersonRole(
+            string userId, [FromBody] SetPersonRoleRequest request, CancellationToken ct)
+            => Ok(await _mediator.Send(new SetPersonRoleCommand(userId, request.Role), ct));
+
+        [HttpPut("people/{userId}/status")]
+        public async Task<IActionResult> SetPersonStatus(
+            string userId, [FromBody] SetPersonStatusRequest request, CancellationToken ct)
+            => Ok(await _mediator.Send(new SetPersonStatusCommand(userId, request.AccountStatus), ct));
+
+        [HttpPost("people")]
+        public async Task<IActionResult> AddPerson(
+            [FromBody] AddPersonCommand command, CancellationToken ct)
+        {
+            var result = await _mediator.Send(command, ct);
+            return CreatedAtAction(nameof(People), result);
+        }
     }
 }

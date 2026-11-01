@@ -1,7 +1,8 @@
-﻿using EmployeeTracking.Application.Commands.Auth;
+using EmployeeTracking.Application.Commands.Auth;
 using EmployeeTracking.Application.DTOs;
 using EmployeeTracking.Application.Interfaces;
 using EmployeeTracking.Domain.Common;
+using EmployeeTracking.Domain.Enums;
 using EmployeeTracking.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,8 @@ namespace EmployeeTracking.Infrastructure.Handlers
             RegisterCommand request, CancellationToken ct)
         {
             var existing = await _userManager.FindByEmailAsync(request.Email);
-            if (existing is not null)
+            var employeeRecord = await _uow.Employees.GetByEmailAsync(request.Email, ct);
+            if (existing is not null || employeeRecord?.AccountStatus == AccountStatus.Deleted)
                 throw new DomainException("An account with this email already exists.");
 
             var user = new ApplicationUser
@@ -48,26 +50,24 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 throw new DomainException($"Registration failed: {errors}");
             }
 
-            // Assign all requested roles
-            foreach (var role in request.Roles)
-            {
-                if (!await _roleManager.RoleExistsAsync(role))
-                    await _roleManager.CreateAsync(new IdentityRole(role));
+            const string role = "Employee";
+            if (!await _roleManager.RoleExistsAsync(role))
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            await _userManager.AddToRoleAsync(user, role);
 
-                await _userManager.AddToRoleAsync(user, role);
-            }
-
-            // link to Employee record if Admin already created one for this email
-            var employeeRecord = await _uow.Employees.GetByEmailAsync(request.Email, ct);
             if (employeeRecord is not null)
             {
                 user.EmployeeId = employeeRecord.Id;
+                user.AccountStatus = employeeRecord.AccountStatus;
                 await _userManager.UpdateAsync(user);
             }
 
             var roles = await _userManager.GetRolesAsync(user);
+            var fullName = $"{request.FirstName} {request.LastName}".Trim();
+            if (employeeRecord is not null && !string.IsNullOrWhiteSpace(employeeRecord.FullName))
+                fullName = employeeRecord.FullName;
             var accessToken = _jwtTokenService.GenerateAccessToken(
-                user.Id, user.Email!, user.EmployeeId, roles);
+                user.Id, user.Email!, fullName, user.EmployeeId, roles);
             var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id);
 
             await _uow.RefreshTokens.AddAsync(refreshToken, ct);
@@ -77,9 +77,10 @@ namespace EmployeeTracking.Infrastructure.Handlers
                 AccessToken: accessToken,
                 RefreshToken: refreshToken.Token,
                 Email: user.Email!,
-                FullName: $"{request.FirstName} {request.LastName}",
+                FullName: fullName,
                 Roles: roles,
-                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15));
+                AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(15),
+                AccountStatus: user.AccountStatus.ToString());
         }
     }
 }
